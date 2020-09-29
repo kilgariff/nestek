@@ -103,7 +103,7 @@ void iNESGI(GI h) { //bbit edited: removed static keyword
 		break;
 	case GI_CLOSE:
 	{
-		FCEU_SaveGameSave(&iNESCart);
+		//FCEU_SaveGameSave(&iNESCart);
 		if (iNESCart.Close)
 			iNESCart.Close();
 		if (ROM) {

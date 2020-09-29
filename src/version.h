@@ -35,7 +35,7 @@
 #endif
 #endif
 
-#define FCEU_NAME "FCEUX"
+#define FCEU_NAME "FLEA!"
 
 #define FCEU_FEATURE_STRING ""
 

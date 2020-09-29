@@ -12,13 +12,14 @@ extern uint8 *XBackBuf;
 extern uint8 *XDBuf;
 extern uint8 *XDBackBuf;
 extern int ClipSidesOffset;
+
 extern struct GUIMESSAGE
 {
 	//countdown for gui messages
 	int howlong;
 
 	//the current gui message
-	char errmsg[110];
+	char errmsg[2048];
 
 	//indicates that the movie should be drawn even on top of movies
 	bool isMovieMessage;
@@ -32,8 +33,6 @@ extern GUIMESSAGE subtitleMessage;
 
 void FCEU_DrawNumberRow(uint8 *XBuf, int *nstatus, int cur);
 
-std::string FCEUI_GetSnapshotAsName();
-void FCEUI_SetSnapshotAsName(std::string name);
 bool FCEUI_ShowFPS();
 void FCEUI_SetShowFPS(bool showFPS);
 void FCEUI_ToggleShowFPS();

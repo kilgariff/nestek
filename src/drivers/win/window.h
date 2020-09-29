@@ -31,6 +31,7 @@ void FixWXY(int pref, bool shift_held = false);
 void ByebyeWindow();
 void DoTimingConfigFix();
 int CreateMainWindow();
+void UpdateConfigMenu();
 void UpdateCheckedMenuItems();
 void LoadNewGamey(HWND hParent, const char *initialdir);
 int BrowseForFolder(HWND hParent, const char *htext, char *buf);

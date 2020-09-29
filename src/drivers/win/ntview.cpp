@@ -33,7 +33,6 @@ and invalidate it when the vnapage changes.
 
 #include "common.h"
 #include "ntview.h"
-#include "debugger.h"
 #include "../../fceu.h"
 #include "../../debug.h"
 #define INESPRIV

@@ -213,96 +213,98 @@ void BeginJoyWait(HWND hwnd)
 
 int DoJoyWaitTest(GUID *guid, uint8 *devicenum, uint16 *buttonnum)
 {
- int n;
- int x;
+	int n;
+	int x;
 
- for(n=0; n<numjoysticks; n++)
- {
-  HRESULT dival;
-  DIJOYSTATE2 JoyStatus;
-  int ba;
+	for(n=0; n<numjoysticks; n++)
+	{
+		HRESULT dival;
+		DIJOYSTATE2 JoyStatus;
+		int ba;
 
-  while((dival = IDirectInputDevice7_Poll(Joysticks[n])) != DI_OK)
-  {
-   if(dival == DI_NOEFFECT) break;
-   if(!JoyAutoRestore(dival,Joysticks[n])) return(0);
-  }
-  dival = IDirectInputDevice7_GetDeviceState(Joysticks[n],sizeof(DIJOYSTATE2),&JoyStatus);
+		while((dival = IDirectInputDevice7_Poll(Joysticks[n])) != DI_OK)
+		{
+			if(dival == DI_NOEFFECT) break;
+			if(!JoyAutoRestore(dival,Joysticks[n])) return(0);
+		}
+		dival = IDirectInputDevice7_GetDeviceState(Joysticks[n],sizeof(DIJOYSTATE2),&JoyStatus);
 
-  for(ba = 0; ba < 128; ba++)
-   if((JoyStatus.rgbButtons[ba]&0x80) && !(StatusSave[n].rgbButtons[ba]&0x80))
-   {
-    *devicenum = n;
-    *buttonnum = ba;
-    *guid = JoyGUID[n];
-    //memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
-    memcpy(StatusSave[n].rgbButtons, JoyStatus.rgbButtons, 128);
-    return(1);
-   }
+		for(ba = 0; ba < 128; ba++)
+		if((JoyStatus.rgbButtons[ba]&0x80))
+		{
+			*devicenum = n;
+			*buttonnum = ba;
+			*guid = JoyGUID[n];
+			//memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+			//memcpy(StatusSave[n].rgbButtons, JoyStatus.rgbButtons, 128);
+			return(1);
+		}
 
-  memcpy(StatusSave[n].rgbButtons, JoyStatus.rgbButtons, 128);
+		//memcpy(StatusSave[n].rgbButtons, JoyStatus.rgbButtons, 128);
 
-  // lX, lY, lZ
-  long dax, day, daz;
-  long source,psource;
+		// lX, lY, lZ
+		long dax, day, daz;
+		long source,psource;
 
-  dax = ranges[n].MaxX - ranges[n].MinX;
-  day = ranges[n].MaxY - ranges[n].MinY;
-  daz = ranges[n].MaxZ - ranges[n].MinZ;
+		dax = ranges[n].MaxX - ranges[n].MinX;
+		day = ranges[n].MaxY - ranges[n].MinY;
+		daz = ranges[n].MaxZ - ranges[n].MinZ;
 
-  if(dax)
-  {
-   source=((int64)JoyStatus.lX - ranges[n].MinX) * 262144 / dax - 131072;
-   psource=((int64)StatusSave[n].lX - ranges[n].MinX) * 262144 / dax - 131072;
+		if(dax)
+		{
+			source=((int64)JoyStatus.lX - ranges[n].MinX) * 262144 / dax - 131072;
+			psource=((int64)StatusSave[n].lX - ranges[n].MinX) * 262144 / dax - 131072;
 
-   if(abs(source) >= 65536 && canax[n][0])
-   {
-    *guid = JoyGUID[n];
-    *devicenum = n;
-    *buttonnum = 0x8000 | (0) | ((source < 0) ? 0x4000 : 0);
-    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));   
-    canax[n][0] = 0;
-    return(1);
-   } else if(abs(source) <= 32768) canax[n][0] = 1;
-  }
+			if (abs(source) >= 65536 && canax[n][0])
+			{
+				*guid = JoyGUID[n];
+				*devicenum = n;
+				*buttonnum = 0x8000 | (0) | ((source < 0) ? 0x4000 : 0);
+				//memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));   
+				canax[n][0] = 0;
+				return(1);
+			}
+			else if (abs(source) <= 32768)
+			{
+				canax[n][0] = 1;
+			}
+		}
 
-  if(day)
-  {
-   source=((int64)JoyStatus.lY - ranges[n].MinY) * 262144 / day - 131072;
-   psource=((int64)StatusSave[n].lY - ranges[n].MinY) * 262144 / day - 131072;
+		if(day)
+		{
+			source=((int64)JoyStatus.lY - ranges[n].MinY) * 262144 / day - 131072;
+			//psource=((int64)StatusSave[n].lY - ranges[n].MinY) * 262144 / day - 131072;
 
-   if(abs(source) >= 65536 && canax[n][1])
-   {
-    *guid = JoyGUID[n];
-    *devicenum = n;
-    *buttonnum = 0x8000 | (1) | ((source < 0) ? 0x4000 : 0);
-    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
-    canax[n][1] = 0;
-    return(1);
-   }  else if(abs(source) <= 32768) canax[n][1] = 1;
-  }
+			if(abs(source) >= 65536 && canax[n][1])
+			{
+				*guid = JoyGUID[n];
+				*devicenum = n;
+				*buttonnum = 0x8000 | (1) | ((source < 0) ? 0x4000 : 0);
+				//memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+				canax[n][1] = 0;
+				return(1);
+			}
+			else if (abs(source) <= 32768)
+			{
+				canax[n][1] = 1;
+			}
+		}
 
-  if(daz)
-  {
-
-
-  }
-
-  for(x=0; x<4; x++)
-  {   
-   if(POVFix(JoyStatus.rgdwPOV[x],-1) != FPOV_CENTER && POVFix(StatusSave[n].rgdwPOV[x],-1) == FPOV_CENTER)
-   {
-    *guid = JoyGUID[n];
-    *devicenum = n;
-    *buttonnum = 0x2000 | (x<<4) | POVFix(JoyStatus.rgdwPOV[x], -1);
-    memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
-    return(1);
-   }
-  }
-  memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
- }
+		for(x=0; x<4; x++)
+		{   
+			if(POVFix(JoyStatus.rgdwPOV[x],-1) != FPOV_CENTER)
+			{
+				*guid = JoyGUID[n];
+				*devicenum = n;
+				*buttonnum = 0x2000 | (x<<4) | POVFix(JoyStatus.rgdwPOV[x], -1);
+				//memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+				return(1);
+			}
+		}
+		//memcpy(&StatusSave[n], &JoyStatus, sizeof(DIJOYSTATE2));
+	}
  
- return(0);
+	return(0);
 }
 
 void EndJoyWait(HWND hwnd)

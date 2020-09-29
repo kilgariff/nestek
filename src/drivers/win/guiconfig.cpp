@@ -84,7 +84,7 @@ void CloseGuiDialog(HWND hwndDlg)
 				"  xmlns=\"urn:schemas-microsoft-com:asm.v1\"\n"
 				"  manifestVersion=\"1.0\">\n"
 				"<assemblyIdentity\n"
-				"    name=\"FCEUX\"\n"
+				"    name=\"FCEUX_STANDALONE\"\n"
 				"    processorArchitecture=\"*\"\n"
 				"    version=\"1.0.0.0\"\n"
 				"    type=\"win32\"/>\n"

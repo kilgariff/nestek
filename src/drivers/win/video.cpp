@@ -24,7 +24,6 @@
 #include "../../fceu.h"
 #include "../../video.h"
 #include "input.h"
-#include "mapinput.h"
 #include <math.h>
 
 extern bool fullscreenByDoubleclick;
@@ -1273,7 +1272,6 @@ INT_PTR CALLBACK VideoConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 		if (c)
 		{
 			strcat(buf, " (");
-			strcat(buf, GetKeyComboName(c));
 			if (fullscreenByDoubleclick)
 				strcat(buf, " or double-click)");
 			else

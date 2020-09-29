@@ -212,7 +212,6 @@
 #define IDB_BRANCH_SPRITESHEET          184
 #define IDD_TASEDITOR_SAVECOMPACT       195
 #define IDD_TASEDITOR_EXPORT            196
-#define IDI_ICON3                       197
 #define IDD_TASEDITOR_FINDNOTE          198
 #define IDD_TASEDITOR_ABOUT             199
 #define MENU_RESET                      200
@@ -243,7 +242,6 @@
 #define IDC_ADDBP_ADDR_END              201
 #define IDC_NTVIEW_REFRESH_TRACKBAR     201
 #define IDC_ASSEMBLER_APPLY             201
-#define IDI_ICON4                       201
 #define BTN_OK                          201
 #define BUTTON_BATTERY                  201
 #define MENU_EJECT_DISK                 202
@@ -713,7 +711,6 @@
 #define IDC_DEBUGGER_RESTORESIZE        1191
 #define IDC_MOVIE_CLOSE                 1192
 #define EDIT00_RESULTS                  1193
-#define IDC_MOVIE_PAUSEAFTERPLAYBACK    1193
 #define EDIT01_RESULTS                  1194
 #define IDC_MOVIE_BINDSAVESTATES        1194
 #define EDIT02_RESULTS                  1195
@@ -802,11 +799,7 @@
 #define IDC_BUTTON_LUARUN               1249
 #define IDC_BUTTON_LUASTOP              1250
 #define IDC_EDIT_LUAPATH                1251
-#define IDC_LUACONSOLE                  1252
 #define IDC_BUTTON_LUAEDIT              1253
-#define IDC_LUACONSOLE_CLEAR            1254
-#define IDC_LUACONSOLE_CHOOSEFONT       1255
-#define IDC_EDIT_LUAARGS                1256
 #define CB_PARTIALVISUALTHEME           1257
 #define DEBUGLOADDEB                    1258
 #define IDC_C_SEARCHROM                 1258

@@ -38,10 +38,6 @@
 #include "sound.h"
 #include "keyscan.h"
 
-#ifdef _S9XLUA_H
-#include "fceulua.h"
-#endif
-
 LPDIRECTINPUT7 lpDI=0;
 
 void InitInputPorts(bool fourscore);
@@ -74,13 +70,6 @@ static void PresetImport(int preset);
 
 static uint32 MouseData[3];
 static int32 MouseRelative[3];
-
-#ifdef _S9XLUA_H
-static uint32 LuaMouseData[3];
-#else
-static uint32* const LuaMouseData = MouseData;
-#endif
-
 
 //force the input types suggested by the game
 void ParseGIInput(FCEUGI *gi)
@@ -517,9 +506,6 @@ void FCEUD_UpdateInput()
 		if (mouse)
 		{
 			GetMouseData(MouseData);
-			#ifdef _S9XLUA_H
-				FCEU_LuaReadZapper(MouseData, LuaMouseData);
-			#endif
 		}
 		if (mouse_relative) GetMouseRelative(MouseRelative);
 	}
@@ -566,9 +552,6 @@ void InitInputPorts(bool fourscore)
 				break;
 			case SI_ARKANOID:
 				InputDPtr=MouseData;
-				break;
-			case SI_ZAPPER:
-				InputDPtr=LuaMouseData;
 				break;
 			case SI_MOUSE:
 				InputDPtr=MouseRelative;
@@ -651,6 +634,11 @@ ButtConfig fkbmap[0x48]=
 	MK(BL_PAGEDOWN),
 	MK(BL_CURSORUP),MK(BL_CURSORLEFT),MK(BL_CURSORRIGHT),MK(BL_CURSORDOWN)
 };
+
+ButtConfig * GetGamePadConfig(size_t n)
+{
+	return GamePadConfig[n];
+}
 
 ButtConfig suborkbmap[0x65]=
 {
@@ -870,7 +858,7 @@ void InitInputStuff(void)
 			JoyClearBC(&virtualboysc[x][y]);
 }
 
-static char *MakeButtString(ButtConfig *bc)
+char *MakeButtString(ButtConfig *bc)
 {
 	uint32 x; //mbg merge 7/17/06  changed to uint
 	char tmpstr[512];
@@ -880,21 +868,22 @@ static char *MakeButtString(ButtConfig *bc)
 
 	for(x=0;x<bc->NumC;x++)
 	{
-		if(x) strcat(tmpstr, ", ");
+		if(x) strcat(tmpstr, ", or ");
 
 		if(bc->ButtType[x] == BUTTC_KEYBOARD)
 		{
-			strcat(tmpstr,"KB: ");
-			if(!GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr+strlen(tmpstr), 16))
+			if (GetKeyNameText(((bc->ButtonNum[x] & 0x7F) << 16) | ((bc->ButtonNum[x] & 0x80) << 17), tmpstr + strlen(tmpstr), 16))
+			{
+				sprintf(tmpstr + strlen(tmpstr), " key");
+			}
+			else
 			{
 				// GetKeyNameText wasn't able to provide a name for the key, then just show scancode
-				sprintf(tmpstr+strlen(tmpstr),"%03d",bc->ButtonNum[x]);
+				sprintf(tmpstr+strlen(tmpstr),"Key #%03d",bc->ButtonNum[x]);
 			}
 		}
 		else if(bc->ButtType[x] == BUTTC_JOYSTICK)
 		{
-			strcat(tmpstr,"JS ");
-			sprintf(tmpstr+strlen(tmpstr), "%d ", bc->DeviceNum[x]);
 			if(bc->ButtonNum[x] & 0x8000)
 			{
 				char *asel[3]={"x","y","z"};
@@ -910,6 +899,8 @@ static char *MakeButtString(ButtConfig *bc)
 				sprintf(tmpstr+strlen(tmpstr), "button %d", bc->ButtonNum[x] & 127);
 			}
 
+			strcat(tmpstr, " (pad ");
+			sprintf(tmpstr + strlen(tmpstr), "%d)", bc->DeviceNum[x]);
 		}
 	}
 
@@ -956,6 +947,9 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 			   bc->ButtonNum[wc]=buttonnum;
 			   bc->DeviceInstance[wc] = guid;
 
+			   // NOTE(ross): HERE is where we extract the button number.
+			   printf("Keyboard key number was %d\n", buttonnum);
+
 			   /* Stop config if the user pushes the same button twice in a row. */
 			   if(wc && bc->ButtType[wc]==bc->ButtType[wc-1] && bc->DeviceNum[wc]==bc->DeviceNum[wc-1] &&
 				   bc->ButtonNum[wc]==bc->ButtonNum[wc-1])   
@@ -992,8 +986,8 @@ static INT_PTR CALLBACK DWBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM 
 
 		   bc->ButtType[wc]=BUTTC_KEYBOARD;
 		   bc->DeviceNum[wc]=0;
-		   bc->ButtonNum[wc]=lParam&255;
-
+		   bc->ButtonNum[wc]=lParam&255; // NOTE(ross): HERE is where we extract the button number.
+		   
 		   //Stop config if the user pushes the same button twice in a row.
 		   if(wc && bc->ButtType[wc]==bc->ButtType[wc-1] && bc->DeviceNum[wc]==bc->DeviceNum[wc-1] &&
 			   bc->ButtonNum[wc]==bc->ButtonNum[wc-1])   
@@ -1176,6 +1170,8 @@ static INT_PTR CALLBACK DoTBCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 			   char btext[128];
 			   btext[0]=0;
 			   GetDlgItemText(hwndDlg, b, btext, 128);
+
+			   printf("Remapping button %d\n", b - 300);
 			   DWaitButton(hwndDlg, (uint8*)btext,&DoTBButtons[b - 300]); //mbg merge 7/17/06 added cast
 		   }
 		   else switch(wParam&0xFFFF)
@@ -1679,7 +1675,7 @@ int FCEUD_TestCommandState(int c)
 		//		else
 		//			keys_nr=GetKeyboard_nr();
 	}
-	else if(c != EMUCMD_SPEED_TURBO && c != EMUCMD_TASEDITOR_REWIND) // TODO: this should be made more general by detecting if the command has an "off" function
+	else if(c != EMUCMD_SPEED_TURBO) // TODO: this should be made more general by detecting if the command has an "off" function
 	{
 		keys=GetKeyboard_jd();
 		keys_nr=GetKeyboard_nr(); 

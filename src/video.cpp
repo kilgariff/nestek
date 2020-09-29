@@ -33,9 +33,6 @@
 #include "drawing.h"
 #include "driver.h"
 #include "drivers/common/vidblit.h"
-#ifdef _S9XLUA_H
-#include "fceulua.h"
-#endif
 
 #ifdef WIN32
 #include "drivers/win/common.h" //For DirectX constants
@@ -220,10 +217,6 @@ void FCEU_PutImage(void)
 	{
 		DrawNSF(XBuf);
 
-#ifdef _S9XLUA_H
-		FCEU_LuaGui(XBuf);
-#endif
-
 		//Save snapshot after NSF screen is drawn.  Why would we want to do it before?
 		if(dosnapsave==1)
 		{
@@ -239,11 +232,6 @@ void FCEU_PutImage(void)
 
 		//Some messages need to be displayed before the avi is dumped
 		DrawMessage(true);
-
-#ifdef _S9XLUA_H
-		// Lua gui should draw before the avi is dumped.
-		FCEU_LuaGui(XBuf);
-#endif
 
 		//Save snapshot
 		if(dosnapsave==1)
@@ -421,13 +409,6 @@ void FCEU_DispMessage(const char *format, int disppos=0, ...)
 	va_start(ap,disppos);
 	vsnprintf(guiMessage.errmsg,sizeof(guiMessage.errmsg),format,ap);
 	va_end(ap);
-	// also log messages
-	char temp[2048];
-	va_start(ap,disppos);
-	vsnprintf(temp,sizeof(temp),format,ap);
-	va_end(ap);
-	strcat(temp, "\n");
-	FCEU_printf(temp);
 
 	guiMessage.howlong = 180;
 	guiMessage.isMovieMessage = false;

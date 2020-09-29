@@ -35,9 +35,6 @@
 #include "input.h"
 #include "state.h"
 #include "driver.h"
-#ifdef _S9XLUA_H
-#include "fceulua.h"
-#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

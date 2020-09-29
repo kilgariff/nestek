@@ -38,16 +38,10 @@
 #include "input.h"
 #include "zlib.h"
 #include "driver.h"
-#ifdef _S9XLUA_H
-#include "fceulua.h"
-#endif
 
 //TODO - we really need some kind of global platform-specific options api
 #ifdef WIN32
 #include "drivers/win/main.h"
-#include "drivers/win/cheat.h"
-#include "drivers/win/ram_search.h"
-#include "drivers/win/ramwatch.h"
 #endif
 
 #include <string>
@@ -494,32 +488,6 @@ void FCEUSS_Save(const char *fname, bool display_message)
 		return;
 	}
 
-	#ifdef _S9XLUA_H
-	if (!internalSaveLoad)
-	{
-		LuaSaveData saveData;
-		CallRegisteredLuaSaveFunctions(CurrentState, saveData);
-
-		char luaSaveFilename [512];
-		strncpy(luaSaveFilename, fn, 512);
-		luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
-		strcat(luaSaveFilename, ".luasav");
-		if(saveData.recordList)
-		{
-			FILE* luaSaveFile = fopen(luaSaveFilename, "wb");
-			if(luaSaveFile)
-			{
-				saveData.ExportRecords(luaSaveFile);
-				fclose(luaSaveFile);
-			}
-		}
-		else
-		{
-			unlink(luaSaveFilename);
-		}
-	}
-	#endif
-
 	if(FCEUMOV_Mode(MOVIEMODE_INACTIVE))
 		FCEUSS_SaveMS(st,-1);
 	else
@@ -774,30 +742,6 @@ bool FCEUSS_Load(const char *fname, bool display_message)
 			SaveStateStatus[CurrentState] = 1;
 		}
 		delete st;
-
-		#ifdef _S9XLUA_H
-		if (!internalSaveLoad)
-		{
-			LuaSaveData saveData;
-
-			char luaSaveFilename [512];
-			strncpy(luaSaveFilename, fn, 512);
-			luaSaveFilename[512-(1+7/*strlen(".luasav")*/)] = '\0';
-			strcat(luaSaveFilename, ".luasav");
-			FILE* luaSaveFile = fopen(luaSaveFilename, "rb");
-			if(luaSaveFile)
-			{
-				saveData.ImportRecords(luaSaveFile);
-				fclose(luaSaveFile);
-			}
-
-			CallRegisteredLuaLoadFunctions(CurrentState, saveData);
-		}
-		#endif
-
-#ifdef WIN32
-	Update_RAM_Search(); // Update_RAM_Watch() is also called.
-#endif
 
 		//Update input display if movie is loaded
 		extern uint32 cur_input_display;

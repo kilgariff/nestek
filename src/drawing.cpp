@@ -134,7 +134,8 @@ void DrawMessage(bool beforeMovie)
 			return;
 
 		uint8 *t;
-		guiMessage.howlong--;
+
+		//guiMessage.howlong--;
 
 		if (guiMessage.linesFromBottom > 0)
 			t=XBuf+FCEU_TextScanlineOffsetFromBottom(guiMessage.linesFromBottom)+1;
@@ -400,18 +401,18 @@ static int JoedCharWidth(uint8 ch)
 	return Font6x7[FixJoedChar(ch)*8];
 }
 
-char target[64][256];
+char target[256][256];
 
 void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 fgcolor, int max_w, int max_h, int border)
 {
 	int beginx=2, x=beginx;
 	int y=2;
 
-	memset(target, 0, 64 * 256);
+	memset(target, 0, 256 * 256);
 
 	assert(width==256);
 	if (max_w > 256) max_w = 256;
-	if (max_h >  64) max_h =  64;
+	if (max_h > 256) max_h = 256;
 
 	int ch = 0, wid = 0, nx = 0, ny = 0, max_x = x, offs = 0;
 	int pixel_color;
@@ -442,13 +443,14 @@ void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 fgcolor, int 
 				pixel_color = (d >> (7 - nx)) & 1;
 				if (pixel_color)
 				{
-					if (y + ny >= 62)
+					if (y + ny >= 254)
 					{
-						// Max border is 2, so the max safe y is 62 (since 64 is the max for the target array
+						// Max border is 2, so the max safe y is 254 (since 256 is the max for the target array
 						goto textoverflow;
 					}
 					target[y + ny][x + nx] = 2;
-				} else
+				}
+				else
 				{
 					target[y + ny][x + nx] = 1;
 				}
@@ -458,7 +460,6 @@ void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 fgcolor, int 
 		x += wid;
 		if (max_x < x)
 			max_x = x;
-
 	}
 textoverflow:
 
@@ -466,56 +467,78 @@ textoverflow:
 	if (max_x > width)
 		max_x = width;
 	int max_y = y + ny + 2;
-	if (max_y > 62)
-		max_y = 62;
+	if (max_y > 254)
+		max_y = 254;
 
 	// draw target buffer to screen buffer
-	for (y = 0; y < max_y; ++y)
+	int idx = 0;
+	for (y = 0; y < 256; ++y)
 	{
-		for (x = 0; x < max_x; ++x)
+		for (x = 0; x < 256; ++x)
 		{
 			offs = y * width + x;
 			pixel_color = target[y][x] * 100;
 
-			if(border>=1)
+			//if(border>=1)
+			//{
+			//	x>=(     1) && (pixel_color += target[y][x-1]);
+			//	x<(width-1) && (pixel_color += target[y][x+1]);
+			//	y>=(     1) && (pixel_color += target[y-1][x]);
+			//	y<(16   -1) && (pixel_color += target[y+1][x]);
+			//}
+			//if(border>=2)
+			//{
+			//	x>=(     1) && (pixel_color += target[y][x-1]*10);
+			//	x<(width-1) && (pixel_color += target[y][x+1]*10);
+			//	y>=(     1) && (pixel_color += target[y-1][x]*10);
+			//	y<(16   -1) && (pixel_color += target[y+1][x]*10);
+
+			//	x>=(     1) && y>=(  1) && (pixel_color += target[y-1][x-1]);
+			//	x<(width-1) && y>=(  1) && (pixel_color += target[y-1][x+1]);
+			//	x>=(     1) && y<(16-1) && (pixel_color += target[y+1][x-1]);
+			//	x<(width-1) && y<(16-1) && (pixel_color += target[y+1][x+1]);
+
+			//	x>=(     2) && (pixel_color += target[y][x-2]);
+			//	x<(width-2) && (pixel_color += target[y][x+2]);
+			//	y>=(     2) && (pixel_color += target[y-2][x]);
+			//	y<(16   -2) && (pixel_color += target[y+2][x]);
+			//}
+
+			if (pixel_color >= 200)
 			{
-				x>=(     1) && (pixel_color += target[y][x-1]);
-				x<(width-1) && (pixel_color += target[y][x+1]);
-				y>=(     1) && (pixel_color += target[y-1][x]);
-				y<(16   -1) && (pixel_color += target[y+1][x]);
-			}
-			if(border>=2)
-			{
-				x>=(     1) && (pixel_color += target[y][x-1]*10);
-				x<(width-1) && (pixel_color += target[y][x+1]*10);
-				y>=(     1) && (pixel_color += target[y-1][x]*10);
-				y<(16   -1) && (pixel_color += target[y+1][x]*10);
-
-				x>=(     1) && y>=(  1) && (pixel_color += target[y-1][x-1]);
-				x<(width-1) && y>=(  1) && (pixel_color += target[y-1][x+1]);
-				x>=(     1) && y<(16-1) && (pixel_color += target[y+1][x-1]);
-				x<(width-1) && y<(16-1) && (pixel_color += target[y+1][x+1]);
-
-				x>=(     2) && (pixel_color += target[y][x-2]);
-				x<(width-2) && (pixel_color += target[y][x+2]);
-				y>=(     2) && (pixel_color += target[y-2][x]);
-				y<(16   -2) && (pixel_color += target[y+2][x]);
-			}
-
-			if(pixel_color >= 200)
 				dest[offs] = fgcolor;
-			else if(pixel_color >= 10)
-			{
-				if(dest[offs] < 0xA0)
-					dest[offs] = 0xC1;
-				else
-					dest[offs] = 0xD1;
 			}
-			else if(pixel_color > 0)
+			else
 			{
-				dest[offs] = 0xCF;
+				dest[offs] = 0xC1;
 			}
+			//
+			//{
+			//	dest[offs] = 0xD1;
+
+			//	//if (guiMessage.howlong <= 40) color = 0x3C;
+			//	//if (guiMessage.howlong <= 32) color = 0x31;
+			//	//if (guiMessage.howlong <= 24) color = 0x21;
+			//	//if (guiMessage.howlong <= 16) color = 0x51;
+			//	//if (guiMessage.howlong <= 8) color = 0x41;
+			//}
+
+			++idx;
+
+			//else if(pixel_color >= 10)
+			//{
+			//	if(dest[offs] < 0xA0)
+			//		dest[offs] = 0xC1;
+			//	else
+			//		dest[offs] = 0xD1;
+			//}
+			//else if(pixel_color > 0)
+			//{
+			//	dest[offs] = 0xCF;
+			//}
 		}
+
+		++idx;
 	}
 }
 

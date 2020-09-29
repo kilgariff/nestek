@@ -14,9 +14,6 @@
 #include "cart.h"
 #include "fds.h"
 #include "vsuni.h"
-#ifdef _S9XLUA_H
-#include "fceulua.h"
-#endif
 #include "utils/guid.h"
 #include "utils/memory.h"
 #include "utils/xstring.h"
@@ -31,8 +28,6 @@
 #include "./drivers/win/common.h"
 #include "./drivers/win/window.h"
 extern void AddRecentMovieFile(const char *filename);
-#include "./drivers/win/taseditor.h"
-extern bool mustEngageTaseditor;
 #endif
 
 extern int RAMInitOption;
@@ -837,11 +832,6 @@ static void StopPlayback()
 static void FinishPlayback()
 {
 	assert(movieMode != MOVIEMODE_RECORD);
-
-	extern int closeFinishedMovie;
-	if (closeFinishedMovie)
-		StopPlayback();
-	else
 	{
 		movieMode = MOVIEMODE_FINISHED;
 		FCEU_DispMessage("Movie finished playing.",0);
@@ -1184,14 +1174,6 @@ void FCEUMOV_AddInputState()
 			currMovieData.insertEmpty(-1, (currFrameCounter + 1) - ((int)currMovieData.records.size() - 1));
 
 		MovieRecord* mr = &currMovieData.records[currFrameCounter];
-		if (isTaseditorRecording())
-		{
-			// record commands and buttons
-			mr->commands |= _currCommand;
-			joyports[0].log(mr);
-			joyports[1].log(mr);
-			recordInputByTaseditor();
-		}
 		// replay buttons
 		joyports[0].load(mr);
 		joyports[1].load(mr);
@@ -1242,10 +1224,7 @@ void FCEUMOV_AddInputState()
 		//if we are on the last frame, then pause the emulator if the player requested it
 		if (currFrameCounter == currMovieData.records.size()-1)
 		{
-			if(FCEUD_PauseAfterPlayback())
-			{
-				FCEUI_ToggleEmulationPause();
-			}
+
 		}
 
 		//pause the movie at a specified frame
@@ -1412,8 +1391,6 @@ bool FCEUMOV_ReadState(EMUFILE* is, uint32 size)
 		{
 #ifdef WIN32
 			int result = MessageBox(hAppWnd, "This movie is a TAS Editor project file.\nIt can be modified in TAS Editor only.\n\nOpen it in TAS Editor now?", "Movie Replay", MB_YESNO);
-			if (result == IDYES)
-				mustEngageTaseditor = true;
 #else
 			FCEUI_printf("This movie is a TAS Editor project file! It can be modified in TAS Editor only.\nMovie is now Read-Only.\n");
 #endif
@@ -1617,18 +1594,11 @@ bool FCEUMOV_PostLoad(void)
 
 void FCEUMOV_IncrementRerecordCount()
 {
-#ifdef _S9XLUA_H
-	if(!FCEU_LuaRerecordCountSkip())
-		if (movieMode != MOVIEMODE_TASEDITOR)
-			currRerecordCount++;
-		else
-			currMovieData.rerecordCount++;
-#else
 	if (movieMode != MOVIEMODE_TASEDITOR)
 		currRerecordCount++;
 	else
 		currMovieData.rerecordCount++;
-#endif
+
 	if (movieMode != MOVIEMODE_TASEDITOR)
 		currMovieData.rerecordCount = currRerecordCount;
 }
@@ -1744,13 +1714,7 @@ void FCEUI_MovieToggleRecording()
 		RedumpWholeMovieFile(true);
 		if (currFrameCounter >= (int)currMovieData.records.size())
 		{
-			extern int closeFinishedMovie;
-			if (closeFinishedMovie)
-			{
-				movieMode = MOVIEMODE_INACTIVE;
-				OnMovieClosed();
-			} else
-				movieMode = MOVIEMODE_FINISHED;
+			movieMode = MOVIEMODE_FINISHED;
 		}
 	} else
 		strcpy(message, "Nothing to do in this mode");
@@ -1807,13 +1771,7 @@ void FCEUI_MovieDeleteFrame()
 
 		if (movieMode != MOVIEMODE_RECORD && currFrameCounter >= (int)currMovieData.records.size())
 		{
-			extern int closeFinishedMovie;
-			if (closeFinishedMovie)
-			{
-				movieMode = MOVIEMODE_INACTIVE;
-				OnMovieClosed();
-			} else
-				movieMode = MOVIEMODE_FINISHED;
+			movieMode = MOVIEMODE_FINISHED;
 		}
 		strcat(message, GetMovieModeStr());
 	} else
@@ -1844,14 +1802,7 @@ void FCEUI_MovieTruncate()
 
 		if (movieMode != MOVIEMODE_RECORD)
 		{
-			extern int closeFinishedMovie;
-			if (closeFinishedMovie)
-			{
-				movieMode = MOVIEMODE_INACTIVE;
-				OnMovieClosed();
-			}
-			else
-				movieMode = MOVIEMODE_FINISHED;
+			movieMode = MOVIEMODE_FINISHED;
 		}
 		strcat(message, GetMovieModeStr());
 	} else
@@ -1892,10 +1843,9 @@ void FCEUI_MoviePlayFromBeginning(void)
 {
 	if (movieMode == MOVIEMODE_TASEDITOR)
 	{
-#ifdef WIN32
-		handleEmuCmdByTaseditor(EMUCMD_MOVIE_PLAY_FROM_BEGINNING);
-#endif
-	} else if (movieMode != MOVIEMODE_INACTIVE)
+
+	}
+	else if (movieMode != MOVIEMODE_INACTIVE)
 	{
 		if (movieMode == MOVIEMODE_RECORD)
 		{

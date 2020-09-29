@@ -46,9 +46,6 @@
     <Filter Include="pix">
       <UniqueIdentifier>{19ba9ddc-37b7-4962-a3d7-9eb69929a8dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="drivers\win\taseditor">
-      <UniqueIdentifier>{cfac36a2-cdfd-4c0a-be8e-353b1303a909}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\asm.cpp" />
@@ -325,22 +322,10 @@
     <ClCompile Include="..\src\drivers\win\aviout.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\cdlogger.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\cheat.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\common.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\config.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\debugger.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\debuggersp.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\directories.cpp">
@@ -367,28 +352,7 @@
     <ClCompile Include="..\src\drivers\win\log.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\luaconsole.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\main.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\mapinput.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\memview.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\memviewsp.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\memwatch.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\monitor.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\movieoptions.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\netplay.cpp">
@@ -406,37 +370,16 @@
     <ClCompile Include="..\src\drivers\win\ppuview.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\pref.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\ramwatch.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\ram_search.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\replay.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\sound.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\state.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\texthook.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\throttle.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\timing.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\tracer.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\video.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
     <ClCompile Include="..\src\drivers\win\wave.cpp">
@@ -544,7 +487,6 @@
     <ClCompile Include="..\src\input\zapper.cpp">
       <Filter>input</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\lua-engine.cpp" />
     <ClCompile Include="..\src\lua\src\lapi.c">
       <Filter>drivers\win\lua</Filter>
     </ClCompile>
@@ -685,74 +627,8 @@
     <ClCompile Include="..\src\boards\onebus.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_config.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_lua.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_project.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\taseditor_window.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\recorder.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\splicer.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\bookmark.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\bookmarks.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\greenzone.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\markers.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\playback.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\popup_display.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\history.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\snapshot.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\markers_manager.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\piano_roll.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\selection.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\editor.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\branches.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\116.cpp">
       <Filter>boards</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\inputlog.cpp">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\taseditor\laglog.cpp">
-      <Filter>drivers\win\taseditor</Filter>
     </ClCompile>
     <ClCompile Include="..\src\boards\cityfighter.cpp">
       <Filter>boards</Filter>
@@ -1105,6 +981,13 @@
     <ClCompile Include="..\src\input\virtualboy.cpp">
       <Filter>input</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\config_menu.cpp" />
+    <ClCompile Include="..\src\drivers\win\config_menu.cpp">
+      <Filter>drivers\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\video.cpp">
+      <Filter>drivers\win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1140,22 +1023,10 @@
     <ClInclude Include="..\src\drivers\win\args.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\cdlogger.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\cheat.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\common.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\config.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\debugger.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\debuggersp.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\directories.h">
@@ -1203,21 +1074,6 @@
     <ClInclude Include="..\src\drivers\win\main.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\mapinput.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\memview.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\memviewsp.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\memwatch.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\monitor.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\netplay.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
@@ -1233,18 +1089,6 @@
     <ClInclude Include="..\src\drivers\win\ppuview.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\pref.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\ramwatch.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\ram_search.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\replay.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\resource.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
@@ -1254,16 +1098,10 @@
     <ClInclude Include="..\src\drivers\win\state.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\texthook.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\drivers\win\throttle.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\timing.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\tracer.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\video.h">
@@ -1425,72 +1263,6 @@
     <ClInclude Include="..\src\drivers\common\nes_ntsc_impl.h">
       <Filter>drivers\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor.h">
-      <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_config.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_lua.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_project.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\taseditor_window.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\recorder.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\splicer.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\bookmark.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\bookmarks.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\greenzone.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\markers.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\playback.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\history.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\snapshot.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\markers_manager.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\piano_roll.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\selection.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\editor.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\branches.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\popup_display.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\inputlog.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\taseditor\laglog.h">
-      <Filter>drivers\win\taseditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\x6502struct.h">
       <Filter>include files</Filter>
     </ClInclude>
@@ -1612,6 +1384,16 @@
       <Filter>input</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\header_editor.h">
+      <Filter>drivers\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\config_menu.h" />
+    <ClInclude Include="..\src\drivers\win\afxres.h">
+      <Filter>drivers\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\config_menu.hpp">
+      <Filter>drivers\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\debug.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1941,12 +1723,6 @@
       <Filter>drivers\win\res</Filter>
     </None>
     <None Include="..\src\drivers\win\res\te_piano_9_lostpos.bmp">
-      <Filter>drivers\win\res</Filter>
-    </None>
-    <None Include="..\src\drivers\win\res\taseditor-icon.ico">
-      <Filter>drivers\win\res</Filter>
-    </None>
-    <None Include="..\src\drivers\win\res\taseditor-icon32.ico">
       <Filter>drivers\win\res</Filter>
     </None>
     <None Include="..\src\ops.inc" />

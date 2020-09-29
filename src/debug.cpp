@@ -564,10 +564,6 @@ bool CondForbidTest(int bp_num) {
 void BreakHit(int bp_num)
 {
 	FCEUI_SetEmulationPaused(EMULATIONPAUSED_PAUSED); //mbg merge 7/19/06 changed to use EmulationPaused()
-
-//#ifdef WIN32
-	FCEUD_DebugBreakpoint(bp_num);
-//#endif
 }
 
 int StackAddrBackup;
@@ -864,11 +860,5 @@ void DebugCycle()
 
 	if(debug_loggingCD)
 		LogCDData(opcode, A, size);
-
-#ifdef WIN32
-	//This needs to be windows only or else the linux build system will fail since logging is declared in a
-	//windows source file
-	FCEUD_TraceInstruction(opcode, size);
-#endif
 
 }

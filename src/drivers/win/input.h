@@ -49,6 +49,10 @@ typedef struct {
         //uint64 DeviceID[MAXBUTTCONFIG];        /* TODO */
 } ButtConfig;
 
+// NOTE(ross): I added this accessor so we can remap keys from window.cpp.
+ButtConfig * GetGamePadConfig(size_t n);
+char * MakeButtString(ButtConfig *bc);
+
 extern CFGSTRUCT InputConfig[];
 extern ARGPSTRUCT InputArgs[];
 void ParseGIInput(FCEUGI *GameInfo);

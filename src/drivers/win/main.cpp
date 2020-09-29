@@ -47,26 +47,17 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #include "../../state.h"
 #include "../../debug.h"
 #include "../../movie.h"
-#include "../../fceulua.h"
 
 #include "archive.h"
 #include "input.h"
 #include "netplay.h"
-#include "memwatch.h"
 #include "joystick.h"
 #include "keyboard.h"
 #include "ppuview.h"
-#include "debugger.h"
 #include "cheat.h"
 #include "debug.h"
 #include "ntview.h"
-#include "ram_search.h"
-#include "ramwatch.h"
-#include "memview.h"
-#include "tracer.h"
-#include "cdlogger.h"
 #include "throttle.h"
-#include "replay.h"
 #include "palette.h" //For the SetPalette function
 #include "main.h"
 #include "args.h"
@@ -75,12 +66,10 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #include "wave.h"
 #include "video.h"
 #include "utils/xstring.h"
-#include <string.h>
-#include "taseditor.h"
-#include "taseditor/taseditor_window.h"
-
-extern TASEDITOR_WINDOW taseditorWindow;
-extern bool taseditorEnableAcceleratorKeys;
+#include <string>
+#include <cstring>
+#include <codecvt>
+#include <locale>
 
 //---------------------------
 //mbg merge 6/29/06 - new aboutbox
@@ -132,7 +121,6 @@ void SetMainWindowStuff(void);
 int GetClientAbsRect(LPRECT lpRect);
 void UpdateFCEUWindow(void);
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
-void ApplyDefaultCommandMapping(void);
 
 // Internal variables
 int frameSkipAmt = 18;
@@ -156,7 +144,7 @@ int soundPCMvol = 256;			//Sound channel PCM - volume control
 
 int KillFCEUXonFrame = 0; //TODO: clean up, this is used in fceux, move it over there?
 
-double winsizemulx = 1.0, winsizemuly = 1.0;
+double winsizemulx = 2.0, winsizemuly = 2.0;
 double tvAspectX = TV_ASPECT_DEFAULT_X, tvAspectY = TV_ASPECT_DEFAULT_Y;
 int genie = 0;
 int pal_emulation = 0;
@@ -334,49 +322,6 @@ int BlockingCheck()
 			//other accelerator capable dialogs could be added here
 			int handled = 0;
 
-			// Cheat console
-			if(hCheat && IsChild(hCheat, msg.hwnd))
-				handled = IsDialogMessage(hCheat, &msg);
-
-			// Hex Editor -> Find
-			if(!handled && hMemFind && IsChild(hMemFind, msg.hwnd))
-				handled = IsDialogMessage(hMemFind, &msg);
-
-			// Memory Watch
-			extern HWND hwndMemWatch;
-			if(!handled && hwndMemWatch)
-			{
-				if(IsChild(hwndMemWatch, msg.hwnd))
-					handled = TranslateAccelerator(hwndMemWatch, fceu_hAccel, &msg);
-				if(!handled)
-					handled = IsDialogMessage(hwndMemWatch,&msg);
-			}
-
-			// RAM Search
-			if(!handled && RamSearchHWnd && IsChild(RamSearchHWnd, msg.hwnd))
-				handled = IsDialogMessage(RamSearchHWnd, &msg);
-
-			// RAM_Watch
-			if(!handled && RamWatchHWnd)
-				if(handled = IsDialogMessage(RamWatchHWnd, &msg))
-					if(msg.message == WM_KEYDOWN) // send keydown messages to the dialog (for accelerators, and also needed for the Alt key to work)
-						SendMessage(RamWatchHWnd, msg.message, msg.wParam, msg.lParam);
-
-			// TAS Editor
-			if(!handled && taseditorWindow.hwndTASEditor)
-			{
-				if(taseditorEnableAcceleratorKeys)
-					if(IsChild(taseditorWindow.hwndTASEditor, msg.hwnd))
-						handled = TranslateAccelerator(taseditorWindow.hwndTASEditor, fceu_hAccel, &msg);
-				if(!handled){
-					handled = IsDialogMessage(taseditorWindow.hwndTASEditor, &msg);
-				}
-			}
-
-			// TAS Editor -> Find Node
-			if(!handled && taseditorWindow.hwndFindNote && IsChild(taseditorWindow.hwndFindNote, msg.hwnd))
-				handled = IsDialogMessage(taseditorWindow.hwndFindNote, &msg);
-
 			// Sound Config
 			extern HWND uug;
 			if(!handled && uug && IsChild(uug, msg.hwnd))
@@ -387,23 +332,6 @@ int BlockingCheck()
 			if(!handled && hWndPal && IsChild(hWndPal, msg.hwnd))
 				handled = IsDialogMessage(hWndPal, &msg);
 
-			// Code/Data Logger
-			if(!handled && hCDLogger && IsChild(hCDLogger, msg.hwnd))
-				handled = IsDialogMessage(hCDLogger, &msg);
-
-			// Trace Logger
-			if(!handled && hTracer && IsChild(hTracer, msg.hwnd))
-				handled = IsDialogMessage(hTracer, &msg);
-
-			// Game Genie Encoder/Decoder
-			extern HWND hGGConv;
-			if(!handled && hGGConv && IsChild(hGGConv, msg.hwnd))
-				handled = IsDialogMessage(hGGConv, &msg);
-
-			// Debugger
-			if(!handled && hDebug && IsChild(hDebug, msg.hwnd))
-				handled = IsDialogMessage(hDebug, &msg);
-
 			// PPU Viewer
 			extern HWND hPPUView;
 			if(!handled && hPPUView && IsChild(hPPUView, msg.hwnd))
@@ -413,16 +341,6 @@ int BlockingCheck()
 			extern HWND hNTView;
 			if(!handled && hNTView && IsChild(hNTView, msg.hwnd))
 				handled = IsDialogMessage(hNTView, &msg);
-
-			// Text Hooker
-			extern HWND hTextHooker;
-			if(!handled && hTextHooker && IsChild(hTextHooker, msg.hwnd))
-				handled = IsDialogMessage(hTextHooker, &msg);
-
-			// Lua Scripts
-			extern HWND LuaConsoleHWnd;
-			if(!handled && LuaConsoleHWnd && IsChild(LuaConsoleHWnd, msg.hwnd))
-				handled = IsDialogMessage(LuaConsoleHWnd, &msg);
 
 			// Logs
 			extern HWND logwin;
@@ -502,51 +420,6 @@ void DoFCEUExit()
 {
 	if(exiting)    //Eh, oops.  I'll need to try to fix this later.
 		return;
-
-	// If user was asked to save changes in TAS Editor and chose cancel, don't close FCEUX
-	extern bool exitTASEditor();
-	if (FCEUMOV_Mode(MOVIEMODE_TASEDITOR) && !exitTASEditor())
-		return;
-
-	if (CloseMemoryWatch() && AskSaveRamWatch())		//If user was asked to save changes in the memory watch dialog or ram watch, and chose cancel, don't close FCEUX!
-	{
-		if(goptions & GOO_CONFIRMEXIT)
-		{
-			//Wolfenstein 3D had cute exit messages.
-			const char * const emsg[]={
-				"Are you sure you want to leave?  I'll become lonely!",
-				"A strange game. The only winning move is not to play. How about a nice game of chess?",
-				"If you exit, I'll... EAT YOUR MOUSE.",
-				"You can never really exit, you know.",
-				"E.X.I.T?",
-				"I'm sorry, you missed your exit. There is another one in 19 miles",
-				"Silly Exit Message goes here"
-			};
-			const int emsg_count = sizeof(emsg) / sizeof(emsg[0]);
-
-			if(IDYES != MessageBox(hAppWnd, emsg[rand() % emsg_count], "Exit FCEUX?", MB_ICONQUESTION | MB_YESNO) )
-			{
-				return;
-			}
-		}
-
-		KillDebugger(); //mbg merge 7/19/06 added
-
-		FCEUI_StopMovie();
-		FCEUD_AviStop();
-#ifdef _S9XLUA_H
-		FCEU_LuaStop(); // kill lua script before the gui dies
-#endif
-
-		exiting = 1;
-		closeGame = true;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
-		// remember the ROM name
-		extern char LoadedRomFName[2048];
-		if (GameInfo)
-			strcpy(romNameWhenClosingEmulator, LoadedRomFName);
-		else
-			romNameWhenClosingEmulator[0] = 0;
-	}
 }
 
 void FCEUD_OnCloseGame()
@@ -578,6 +451,9 @@ int DriverInitialize()
 		soundo = InitSound();
 
 	SetVideoMode(fullscreen);
+
+	// NOTE(ross): This forces fullscreen, but messes up debugging. Only do this for the final build.
+	//SetVideoMode(1);
 	InitInputStuff();             /* Initialize DInput interfaces. */
 
 	return 1;
@@ -687,8 +563,6 @@ int main(int argc,char *argv[])
 
 	//printf("%08x",opsize); //AGAIN?!
 
-	char *t;
-
 	initArchiveSystem();
 
 	if(timeBeginPeriod(1) != TIMERR_NOERROR)
@@ -704,8 +578,6 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	ApplyDefaultCommandMapping();
-
 	fceu_hInstance = GetModuleHandle(0);
 	fceu_hAccel = LoadAccelerators(fceu_hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
@@ -713,12 +585,25 @@ int main(int argc,char *argv[])
 	GetBaseDirectory();
 
 	// load fceux.cfg
-	sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
-	LoadConfig(TempArray);
-	//initDirectories();
+	//sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
+	//LoadConfig(TempArray);
 
-	// Parse the commandline arguments
-	t = ParseArgies(argc, argv);
+	std::string path_to_exe;
+	{
+		WCHAR path[MAX_PATH];
+		GetModuleFileNameW(NULL, path, MAX_PATH);
+		std::wstring wide_str_path(path);
+		std::wstring::size_type pos = wide_str_path.find_last_of(L"\\/");
+		wide_str_path = wide_str_path.substr(0, pos);
+
+		using convert_type = std::codecvt_utf8<wchar_t>;
+		std::wstring_convert<convert_type, wchar_t> converter;
+		path_to_exe = converter.to_bytes(wide_str_path);
+	}
+
+	std::string const rom_file_path = path_to_exe + "\\game.nes";
+
+	fullscreen = 0;
 
 	if(PlayInput)
 		PlayInputFile = fopen(PlayInput, "rb");
@@ -748,8 +633,6 @@ int main(int argc,char *argv[])
         soundo = !!soundo;
         frame_display = !!frame_display;
         allowUDLR = !!allowUDLR;
-        pauseAfterPlayback = !!pauseAfterPlayback;
-        closeFinishedMovie = !!closeFinishedMovie;
         EnableBackgroundInput = !!EnableBackgroundInput;
 		dendy = !!dendy;
 
@@ -770,7 +653,7 @@ int main(int argc,char *argv[])
 	ParseGIInput(NULL);
 
 	// Initialize default directories
-	CreateDirs();
+	//CreateDirs();
 	SetDirs();
 
 	DoVideoConfigFix();
@@ -782,26 +665,22 @@ int main(int argc,char *argv[])
 		FCEUI_SetUserPalette(cpalette,cpalette_count);
 	}
 
-	if(!t)
-	{
-		fullscreen=0;
-	}
-
 	// Do single instance coding, since we now know if the user wants it,
 	// and we have a source window to send from
 	// http://wiki.github.com/ffi/ffi/windows-examples
-	if (SingleInstanceOnly) {
+	if (SingleInstanceOnly)
+	{
 		// Checks window names / hWnds, decides if there's going to be a conflict.
 		EnumDesktopWindows(NULL, EnumCallbackFCEUXInstantiated, (LPARAM)0);
 
-		if (DoInstantiatedExit) {
-
-			if(t)
+		if (DoInstantiatedExit)
+		{
+			//if (rom_file)
 			{
 				COPYDATASTRUCT cData;
 				DATA tData;
 
-				sprintf(tData.strFilePath,"%s",t);
+				sprintf(tData.strFilePath,"%s", rom_file_path.c_str());
 
 				cData.dwData = 1;
 				cData.cbData = sizeof ( tData );
@@ -811,16 +690,16 @@ int main(int argc,char *argv[])
 				do_exit();
 				return 0;
 			}
-			else
-			{
-				//kill this one, activate the other one
-				SetActiveWindow(DoInstantiatedExitWindow);
-				if(IsIconic(DoInstantiatedExitWindow))
-					ShowWindow(DoInstantiatedExitWindow, SW_RESTORE); 
-				SetForegroundWindow(DoInstantiatedExitWindow);
-				do_exit();
-				return 0;
-			}
+			//else
+			//{
+			//	//kill this one, activate the other one
+			//	SetActiveWindow(DoInstantiatedExitWindow);
+			//	if(IsIconic(DoInstantiatedExitWindow))
+			//		ShowWindow(DoInstantiatedExitWindow, SW_RESTORE); 
+			//	SetForegroundWindow(DoInstantiatedExitWindow);
+			//	do_exit();
+			//	return 0;
+			//}
 		}
 	}
 
@@ -838,21 +717,18 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	debugSystem = new DebugSystem();
-	debugSystem->init();
-
 	InitSpeedThrottle();
 
-	if (t)
-	{
-		ALoad(t);
-	} else
-	{
-		if (AutoResumePlay && romNameWhenClosingEmulator && romNameWhenClosingEmulator[0])
-			ALoad(romNameWhenClosingEmulator, 0, true);
-		if (eoptions & EO_FOAFTERSTART)
-			LoadNewGamey(hAppWnd, 0);
-	}
+	//if (rom_file)
+	//{
+		ALoad(rom_file_path.c_str());
+	//} else
+	//{
+	//	if (AutoResumePlay && romNameWhenClosingEmulator && romNameWhenClosingEmulator[0])
+	//		ALoad(romNameWhenClosingEmulator, 0, true);
+	//	if (eoptions & EO_FOAFTERSTART)
+	//		LoadNewGamey(hAppWnd, 0);
+	//}
 
 	if (PAL && pal_setting_specified && !dendy_setting_specified)
 		dendy = 0;
@@ -871,28 +747,11 @@ int main(int argc,char *argv[])
 		PaletteToLoad = NULL;
 	}
 
-	if(GameInfo && MovieToLoad)
-	{
-		//switch to readonly mode if the file is an archive
-		if(FCEU_isFileInArchive(MovieToLoad))
-				replayReadOnlySetting = true;
-
-		FCEUI_LoadMovie(MovieToLoad, replayReadOnlySetting, replayStopFrameSetting != 0);
-		FCEUX_LoadMovieExtras(MovieToLoad);
-		free(MovieToLoad);
-		MovieToLoad = NULL;
-	}
 	if(GameInfo && StateToLoad)
 	{
 		FCEUI_LoadState(StateToLoad);
 		free(StateToLoad);
 		StateToLoad = NULL;
-	}
-	if(GameInfo && LuaToLoad)
-	{
-		FCEU_LoadLuaCode(LuaToLoad);
-		free(LuaToLoad);
-		LuaToLoad = NULL;
 	}
 
 	//Initiates AVI capture mode, will set up proper settings, and close FCUEX once capturing is finished
@@ -900,7 +759,6 @@ int main(int argc,char *argv[])
 	{
 		//We want to disable flags that will pause the emulator
 		PauseAfterLoad = 0;
-		pauseAfterPlayback = 0;
 		KillFCEUXonFrame = AVICapture;
 	}
 
@@ -911,7 +769,6 @@ int main(int argc,char *argv[])
 		AviToLoad = NULL;
 	}
 
-	if (MemWatchLoadOnStart) CreateMemWatch();
 	if (PauseAfterLoad) FCEUI_ToggleEmulationPause();
 	SetAutoFirePattern(AFon, AFoff);
 	UpdateCheckedMenuItems();
@@ -942,11 +799,10 @@ doloopy:
 			}
 			else skippy = 0;
 
-			if(FCEU_LuaFrameskip())
-				skippy = true;
-
 			FCEUI_Emulate(&gfx, &sound, &ssize, skippy); //emulate a single frame
 			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
+
+			UpdateConfigMenu();
 
 			//mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
 			if (closeGame)
@@ -969,13 +825,10 @@ doloopy:
 	timeEndPeriod(1);
 	FCEUI_Kill();
 
-	delete debugSystem;
-
 	return(0);
 }
 
 void FCEUX_LoadMovieExtras(const char * fname) {
-	UpdateReplayCommentsSubs(fname);
 }
 
 //mbg merge 7/19/06 - the function that contains the code that used to just be UpdateFCEUWindow() and FCEUD_UpdateInput()
@@ -983,10 +836,6 @@ void _updateWindow()
 {
 	UpdateFCEUWindow();
 	PPUViewDoBlit();
-	UpdateMemoryView(0);
-	UpdateCDLogger();
-	UpdateLogWindow();	//adelikat: Moved to FCEUI_Emulate;    AnS: moved back
-	UpdateMemWatch();
 	NTViewDoBlit(0);
 	//UpdateTasEditor();	//AnS: moved to FCEUD_Update
 }
@@ -1038,8 +887,6 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 
 	//update debugging displays
 	_updateWindow();
-	// update TAS Editor
-	updateTASEditor();
 
 	extern bool JustFrameAdvanced;
 
