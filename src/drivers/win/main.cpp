@@ -420,6 +420,15 @@ void DoFCEUExit()
 {
 	if(exiting)    //Eh, oops.  I'll need to try to fix this later.
 		return;
+
+	exiting = 1;
+	closeGame = true;//mbg 6/30/06 - for housekeeping purposes we need to exit after the emulation cycle finishes
+	// remember the ROM name
+	extern char LoadedRomFName[2048];
+	if (GameInfo)
+		strcpy(romNameWhenClosingEmulator, LoadedRomFName);
+	else
+		romNameWhenClosingEmulator[0] = 0;
 }
 
 void FCEUD_OnCloseGame()
