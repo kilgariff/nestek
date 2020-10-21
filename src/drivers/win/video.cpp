@@ -24,7 +24,8 @@
 #include "../../fceu.h"
 #include "../../video.h"
 #include "input.h"
-#include <math.h>
+#include <algorithm>
+#include <cmath>
 
 extern bool fullscreenByDoubleclick;
 
@@ -587,7 +588,155 @@ void FCEUD_BlitScreen(uint8 *XBuf)
 
 static void FixPaletteHi(void)
 {
-	SetPaletteBlitToHigh((uint8*)color_palette); //mbg merge 7/17/06 added cast
+    SetPaletteBlitToHigh((uint8*) color_palette); //mbg merge 7/17/06 added cast
+}
+
+void BlitImage(uint8_t const * sourcePixelBytes, size_t sourcePixelByteCount)
+{
+    int pitch;
+    unsigned char *ScreenLoc;
+    static RECT srect, wrect, blitRect;
+    int specialmul;
+
+    if (!lpDDSBack) return;
+
+    // -Video Modes Tag-
+    int xres = 256;
+    if (winspecial <= 3 && winspecial >= 1)
+        specialmul = 2;
+    else if (winspecial >= 4 && winspecial <= 5)
+        specialmul = 3;
+    else if (winspecial >= 6 && winspecial <= 8)
+        specialmul = winspecial - 4; // magic assuming prescales are winspecial >= 6
+    else if (winspecial == 9)
+        specialmul = 3;
+    else specialmul = 1;
+
+    if (winspecial == 3)
+        xres = 301;
+
+    srect.top = srect.left = 0;
+    srect.right = VNSWID_NU(xres) * specialmul;
+    srect.bottom = FSettings.TotalScanlines() * ((winspecial == 9) ? 1 : specialmul);
+
+    if (PaletteChanged == 1)
+    {
+        palupdate = 1;
+        FixPaletteHi();
+        PaletteChanged = 0;
+    }
+
+    if (!GetClientAbsRect(&wrect)) return;
+
+    ddrval = IDirectDrawSurface7_Lock(lpDDSBack, NULL, &ddsdback, 0, NULL);
+    if (ddrval != DD_OK)
+    {
+        if (ddrval == DDERR_SURFACELOST)
+            RestoreDD(1);
+        return;
+    }
+
+    //mbg merge 7/17/06 removing dummyunion stuff
+    pitch = ddsdback.lPitch;
+    ScreenLoc = (unsigned char*) ddsdback.lpSurface; //mbg merge 7/17/06 added cst
+    if (veflags & 1)
+    {
+        memset(ScreenLoc, 0, pitch*ddsdback.dwHeight);
+        veflags &= ~1;
+    }
+
+    // Blit image to our back buffer.
+    {
+        size_t const count = std::min(static_cast<size_t>(pitch * ddsdback.dwHeight), sourcePixelByteCount);
+        for (size_t byte = 0; byte < count; byte += 4)
+        {
+            ScreenLoc[byte] = sourcePixelBytes[byte + 2];
+            ScreenLoc[byte + 1] = sourcePixelBytes[byte + 1];
+            ScreenLoc[byte + 2] = sourcePixelBytes[byte];
+
+            ScreenLoc[byte + 3] = sourcePixelBytes[byte + 3];
+        }
+    }
+
+    IDirectDrawSurface7_Unlock(lpDDSBack, NULL);
+
+    FCEUD_VerticalSync();		// aquanull 2011-11-28 fix tearing
+    if (eoptions & EO_BESTFIT && (bestfitRect.top || bestfitRect.left))
+    {
+        // blit with resizing
+        blitRect.top = wrect.top + bestfitRect.top;
+        blitRect.bottom = blitRect.top + bestfitRect.bottom - bestfitRect.top;
+        blitRect.left = wrect.left + bestfitRect.left;
+        blitRect.right = blitRect.left + bestfitRect.right - bestfitRect.left;
+        if (IDirectDrawSurface7_Blt(lpDDSPrimary, &blitRect, lpDDSBack, &srect, DDBLT_ASYNC, 0) != DD_OK)
+        {
+            ddrval = IDirectDrawSurface7_Blt(lpDDSPrimary, &blitRect, lpDDSBack, &srect, DDBLT_WAIT, 0);
+            if (ddrval != DD_OK)
+            {
+                if (ddrval == DDERR_SURFACELOST)
+                {
+                    RestoreDD(1);
+                    RestoreDD(0);
+                }
+                return;
+            }
+        }
+        // clear borders
+        if (eoptions & EO_BGCOLOR)
+        {
+            // fill the surface using BG color from PPU
+            unsigned char r, g, b;
+            FCEUD_GetPalette(0x80 | PALRAM[0], &r, &g, &b);
+            blitfx.dwFillColor = (r << 16) + (g << 8) + b;
+        }
+        else
+        {
+            blitfx.dwFillColor = 0;
+        }
+        if (bestfitRect.top)
+        {
+            // upper border
+            blitRect.top = wrect.top;
+            blitRect.bottom = wrect.top + bestfitRect.top;
+            blitRect.left = wrect.left;
+            blitRect.right = wrect.right;
+            IDirectDrawSurface7_Blt(lpDDSPrimary, &blitRect, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
+            // lower border
+            blitRect.top += bestfitRect.bottom;
+            blitRect.bottom = wrect.bottom;
+            IDirectDrawSurface7_Blt(lpDDSPrimary, &blitRect, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
+        }
+        if (bestfitRect.left)
+        {
+            // left border
+            blitRect.top = wrect.top;
+            blitRect.bottom = wrect.bottom;
+            blitRect.left = wrect.left;
+            blitRect.right = wrect.left + bestfitRect.left;
+            IDirectDrawSurface7_Blt(lpDDSPrimary, &blitRect, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
+            // right border
+            blitRect.left += bestfitRect.right;
+            blitRect.right = wrect.right;
+            IDirectDrawSurface7_Blt(lpDDSPrimary, &blitRect, NULL, NULL, DDBLT_COLORFILL | DDBLT_ASYNC, &blitfx);
+        }
+    }
+    else
+    {
+        // blit without resizing
+        if (IDirectDrawSurface7_Blt(lpDDSPrimary, &wrect, lpDDSBack, &srect, DDBLT_ASYNC, 0) != DD_OK)
+        {
+            ddrval = IDirectDrawSurface7_Blt(lpDDSPrimary, &wrect, lpDDSBack, &srect, DDBLT_WAIT, 0);
+            if (ddrval != DD_OK)
+            {
+                if (ddrval == DDERR_SURFACELOST)
+                {
+                    RestoreDD(1);
+                    RestoreDD(0);
+                }
+                return;
+            }
+        }
+    }
 }
 
 static void BlitScreenWindow(unsigned char *XBuf)

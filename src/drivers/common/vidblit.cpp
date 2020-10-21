@@ -406,7 +406,7 @@ void Blit32to16(uint32 *src, uint16 *dest, int xr, int yr, int dpitch, int shift
 }
 
 
-void Blit8To8(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale, int efx, int special)
+void Blit8To8(uint8 const *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale, int efx, int special)
 {
 	int x,y;
 	int pinc;
@@ -466,7 +466,7 @@ void Blit8To8(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, in
 /* Todo:  Make sure 24bpp code works right with big-endian cpus */
 
 //takes a pointer to XBuf and applies fully modern deemph palettizing
-u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int xscale, int yscale)
+u32 ModernDeemphColorMap(u8 const * src, u8* srcbuf, int xscale, int yscale)
 {
 	u8 pixel = *src;
 	
@@ -490,7 +490,7 @@ u32 ModernDeemphColorMap(u8* src, u8* srcbuf, int xscale, int yscale)
 	return color;
 }
 
-void Blit8ToHigh(uint8 *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale)
+void Blit8ToHigh(uint8 const *src, uint8 *dest, int xr, int yr, int pitch, int xscale, int yscale)
 {
 	int x,y;
 	int pinc;

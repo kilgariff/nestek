@@ -209,6 +209,8 @@ bool SingleInstanceOnly=false; // Enable/disable option
 bool DoInstantiatedExit=false;
 HWND DoInstantiatedExitWindow;
 
+SplashScreen splash_screen;
+
 // Internal functions
 void SetDirs()
 {
@@ -581,6 +583,8 @@ int main(int argc,char *argv[])
 
 	InitCommonControls();
 
+    splash_screen.LoadAndShow(5000);
+
 	if(!FCEUI_Initialize())
 	{
 		do_exit();
@@ -672,44 +676,6 @@ int main(int argc,char *argv[])
 	if(eoptions & EO_CPALETTE)
 	{
 		FCEUI_SetUserPalette(cpalette,cpalette_count);
-	}
-
-	// Do single instance coding, since we now know if the user wants it,
-	// and we have a source window to send from
-	// http://wiki.github.com/ffi/ffi/windows-examples
-	if (SingleInstanceOnly)
-	{
-		// Checks window names / hWnds, decides if there's going to be a conflict.
-		EnumDesktopWindows(NULL, EnumCallbackFCEUXInstantiated, (LPARAM)0);
-
-		if (DoInstantiatedExit)
-		{
-			//if (rom_file)
-			{
-				COPYDATASTRUCT cData;
-				DATA tData;
-
-				sprintf(tData.strFilePath,"%s", rom_file_path.c_str());
-
-				cData.dwData = 1;
-				cData.cbData = sizeof ( tData );
-				cData.lpData = &tData;
-
-				SendMessage(DoInstantiatedExitWindow,WM_COPYDATA,(WPARAM)(HWND)hAppWnd, (LPARAM)(LPVOID) &cData);
-				do_exit();
-				return 0;
-			}
-			//else
-			//{
-			//	//kill this one, activate the other one
-			//	SetActiveWindow(DoInstantiatedExitWindow);
-			//	if(IsIconic(DoInstantiatedExitWindow))
-			//		ShowWindow(DoInstantiatedExitWindow, SW_RESTORE); 
-			//	SetForegroundWindow(DoInstantiatedExitWindow);
-			//	do_exit();
-			//	return 0;
-			//}
-		}
 	}
 
 	CreateMainWindow();
@@ -808,10 +774,13 @@ doloopy:
 			}
 			else skippy = 0;
 
-			FCEUI_Emulate(&gfx, &sound, &ssize, skippy); //emulate a single frame
-			FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
+            if (splash_screen.IsShowing() == false)
+            {
+			    FCEUI_Emulate(&gfx, &sound, &ssize, skippy); //emulate a single frame
+            }
 
-			UpdateConfigMenu();
+            FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
+            UpdateConfigMenu();
 
 			//mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
 			if (closeGame)
@@ -883,71 +852,68 @@ void win_debuggerLoop()
 // Update the game and gamewindow with a new frame
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
-	win_SoundSetScale(fps_scale); //If turboing and mute turbo is true, bypass this
-
-	//write all the sound we generated.
-	if(soundo && Buffer && Count && !(muteTurbo && turbo)) {
-		win_SoundWriteData(Buffer,Count); //If turboing and mute turbo is true, bypass this
-	}
-
-	//blit the framebuffer
-	if(XBuf)
-		FCEUD_BlitScreen(XBuf);
-
-	//update debugging displays
-	_updateWindow();
-
-	extern bool JustFrameAdvanced;
-
-	//MBG TODO - think about this logic
-	//throttle
-
-	bool throttle = true;
-	if( (eoptions&EO_NOTHROTTLE) )
+	if (splash_screen.IsShowing())
 	{
-		if(!soundo) throttle = false;
+		BlitImage(splash_screen.GetBytes(), splash_screen.GetByteCount());
 	}
+    else
+    {
+        win_SoundSetScale(fps_scale); //If turboing and mute turbo is true, bypass this
 
-	if(throttle)  //if throttling is enabled..
-		if(!turbo) //and turbo is disabled..
-			if(!FCEUI_EmulationPaused()
-				||JustFrameAdvanced
-				)
-				//then throttle
-				while(SpeedThrottle()) {
-					FCEUD_UpdateInput();
-					_updateWindow();
-				}
+        //write all the sound we generated.
+        if (soundo && Buffer && Count && !(muteTurbo && turbo))
+        {
+            win_SoundWriteData(Buffer, Count); //If turboing and mute turbo is true, bypass this
+        }
 
+        //blit the framebuffer
+        if (XBuf)
+            FCEUD_BlitScreen(XBuf);
 
-	//sleep just to be polite
-	if(!JustFrameAdvanced && FCEUI_EmulationPaused()) {
-		Sleep(50);
-	}
+	    extern bool JustFrameAdvanced;
 
-	//while(EmulationPaused==1 && inDebugger)
-	//{
-	//	Sleep(50);
-	//	BlockingCheck();
-	//	FCEUD_UpdateInput(); //should this update the CONTROLS??? or only the hotkeys etc?
-	//}
+        if (!FCEUI_EmulationPaused()
+            || JustFrameAdvanced
+            )
+        {
+            //then throttle 
+            while (SpeedThrottle())
+            {
+                FCEUD_UpdateInput();
+                _updateWindow();
+            }
+        }
 
-	////so, we're not paused anymore.
+	    //sleep just to be polite
+	    if(!JustFrameAdvanced && FCEUI_EmulationPaused()) {
+		    Sleep(50);
+	    }
 
-	////something of a hack, but straightforward:
-	////if we were paused, but not in the debugger, then unpause ourselves and step.
-	////this is so that the cpu won't cut off execution due to being paused, but the debugger _will_
-	////cut off execution as soon as it makes it into the main cpu cycle loop
-	//if(FCEUI_EmulationPaused() && !inDebugger) {
-	//	FCEUI_ToggleEmulationPause();
-	//	FCEUI_Debugger().step = 1;
-	//	FCEUD_DebugBreakpoint();
-	//}
+	    //while(EmulationPaused==1 && inDebugger)
+	    //{
+	    //	Sleep(50);
+	    //	BlockingCheck();
+	    //	FCEUD_UpdateInput(); //should this update the CONTROLS??? or only the hotkeys etc?
+	    //}
+
+	    ////so, we're not paused anymore.
+
+	    ////something of a hack, but straightforward:
+	    ////if we were paused, but not in the debugger, then unpause ourselves and step.
+	    ////this is so that the cpu won't cut off execution due to being paused, but the debugger _will_
+	    ////cut off execution as soon as it makes it into the main cpu cycle loop
+	    //if(FCEUI_EmulationPaused() && !inDebugger) {
+	    //	FCEUI_ToggleEmulationPause();
+	    //	FCEUI_Debugger().step = 1;
+	    //	FCEUD_DebugBreakpoint();
+	    //}
+    }
+
+    //update debugging displays
+    _updateWindow();
 
 	//make sure to update the input once per frame
 	FCEUD_UpdateInput();
-
-
 }
 
 static void FCEUD_MakePathDirs(const char *fname)

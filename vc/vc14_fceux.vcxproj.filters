@@ -16,12 +16,6 @@
     <Filter Include="drivers\win\help">
       <UniqueIdentifier>{d4ab474f-f74e-4042-8e0a-161e0c89a940}</UniqueIdentifier>
     </Filter>
-    <Filter Include="drivers\win\lua">
-      <UniqueIdentifier>{46e87a33-60b3-41a1-87b1-5fc0b410c0a1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="drivers\win\lua\include">
-      <UniqueIdentifier>{bfa3a49b-0c30-4093-8119-7e315c80053d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="drivers\win\res">
       <UniqueIdentifier>{008e1f62-e23f-4235-bee7-a45a466678e9}</UniqueIdentifier>
     </Filter>
@@ -487,96 +481,6 @@
     <ClCompile Include="..\src\input\zapper.cpp">
       <Filter>input</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\lua\src\lapi.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lauxlib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lbaselib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lcode.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\ldblib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\ldebug.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\ldo.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\ldump.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lfunc.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lgc.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\linit.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\liolib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\llex.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lmathlib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lmem.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\loadlib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lobject.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lopcodes.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\loslib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lparser.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lstate.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lstring.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lstrlib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\ltable.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\ltablib.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\ltm.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lundump.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lvm.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\lzio.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\lua\src\print.c">
-      <Filter>drivers\win\lua</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\emu2413.c">
       <Filter>boards</Filter>
     </ClCompile>
@@ -981,13 +885,16 @@
     <ClCompile Include="..\src\input\virtualboy.cpp">
       <Filter>input</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\config_menu.cpp" />
-    <ClCompile Include="..\src\drivers\win\config_menu.cpp">
-      <Filter>drivers\win</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\drivers\win\video.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\drivers\win\splash_screen.cpp">
+      <Filter>drivers\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\drivers\win\config_menu.cpp">
+      <Filter>drivers\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\stb_image_impl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\drivers\common\args.h">
@@ -1055,21 +962,6 @@
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\log.h">
       <Filter>drivers\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\lua\include\lauxlib.h">
-      <Filter>drivers\win\lua\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\lua\include\lua.h">
-      <Filter>drivers\win\lua\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\lua\include\lua.hpp">
-      <Filter>drivers\win\lua\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\lua\include\luaconf.h">
-      <Filter>drivers\win\lua\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\drivers\win\lua\include\lualib.h">
-      <Filter>drivers\win\lua\include</Filter>
     </ClInclude>
     <ClInclude Include="..\src\drivers\win\main.h">
       <Filter>drivers\win</Filter>
@@ -1139,75 +1031,6 @@
     </ClInclude>
     <ClInclude Include="..\src\input\suborkb.h">
       <Filter>input</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lapi.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lauxlib.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lcode.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\ldebug.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\ldo.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lfunc.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lgc.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\llex.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\llimits.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lmem.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lobject.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lopcodes.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lparser.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lstate.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lstring.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\ltable.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\ltm.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lua.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\luaconf.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lualib.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lundump.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lvm.h">
-      <Filter>drivers\win\lua</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\lua\src\lzio.h">
-      <Filter>drivers\win\lua</Filter>
     </ClInclude>
     <ClInclude Include="..\src\palettes\palettes.h">
       <Filter>palettes</Filter>
@@ -1386,14 +1209,16 @@
     <ClInclude Include="..\src\drivers\win\header_editor.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\config_menu.h" />
     <ClInclude Include="..\src\drivers\win\afxres.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\config_menu.hpp">
+    <ClInclude Include="..\src\drivers\win\debug.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\drivers\win\debug.h">
+    <ClInclude Include="..\src\drivers\win\config_menu.h">
+      <Filter>drivers\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\drivers\win\splash_screen.h">
       <Filter>drivers\win</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1726,9 +1551,6 @@
       <Filter>drivers\win\res</Filter>
     </None>
     <None Include="..\src\ops.inc" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\src\auxlib.lua" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\src\drivers\win\res\bitmap21.bmp" />

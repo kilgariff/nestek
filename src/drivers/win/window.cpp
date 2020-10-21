@@ -1448,54 +1448,58 @@ adelikat: Outsourced this to a remappable hotkey
 
 	case WM_KEYUP:
 	{
-		if (config_menu.IsShowing() && config_menu.IsAwaitingKey())
-		{
-			config_menu.StopAwaitingKey();
+        // No input while the splash screen is showing.
+        if (splash_screen.IsShowing() == false)
+        {
+		    if (config_menu.IsShowing() && config_menu.IsAwaitingKey())
+		    {
+			    config_menu.StopAwaitingKey();
 
-			if (config_menu.GetState() == ConfigMenuState::RemapPlayer1 ||
-				config_menu.GetState() == ConfigMenuState::RemapPlayer2)
-			{
-				LPARAM key_code = (((lParam >> 16) & 0x7F) | ((lParam >> 17) & 0x80)) & 255;
+			    if (config_menu.GetState() == ConfigMenuState::RemapPlayer1 ||
+				    config_menu.GetState() == ConfigMenuState::RemapPlayer2)
+			    {
+				    LPARAM key_code = (((lParam >> 16) & 0x7F) | ((lParam >> 17) & 0x80)) & 255;
 
-				size_t const player_idx =
-					config_menu.GetState() == ConfigMenuState::RemapPlayer1 ? 0 : 1;
+				    size_t const player_idx =
+					    config_menu.GetState() == ConfigMenuState::RemapPlayer1 ? 0 : 1;
 
-				ButtConfig * bc = &GetGamePadConfig(player_idx)[size_t(config_menu.GetCurrentRemapOption())];
-				bc->NumC = std::max<uint32>(1, bc->NumC);
-				bc->ButtType[0] = BUTTC_KEYBOARD;
-				bc->DeviceNum[0] = 0;
-				bc->ButtonNum[0] = key_code;
-			}
-		}
-		else if (wParam == VK_ESCAPE)
-		{
-			if (config_menu.IsShowing())
-			{
-				config_menu.Hide();
-			}
-			else
-			{
-				config_menu.Show();
+				    ButtConfig * bc = &GetGamePadConfig(player_idx)[size_t(config_menu.GetCurrentRemapOption())];
+				    bc->NumC = std::max<uint32>(1, bc->NumC);
+				    bc->ButtType[0] = BUTTC_KEYBOARD;
+				    bc->DeviceNum[0] = 0;
+				    bc->ButtonNum[0] = key_code;
+			    }
+		    }
+		    else if (wParam == VK_ESCAPE)
+		    {
+			    if (config_menu.IsShowing())
+			    {
+				    config_menu.Hide();
+			    }
+			    else
+			    {
+				    config_menu.Show();
 
-				// Start timer to listen for gamepad input.
-				SetTimer(GetMainHWND(), 1, 25, 0); // Fire timer 1 every 25 ms (generates WM_TIMER message).
-			}
-		}
-		else if (config_menu.IsShowing())
-		{
-			if (wParam == VK_RETURN)
-			{
-				config_menu.ConfirmOption();
-			}
-			else if (wParam == VK_DOWN)
-			{
-				config_menu.NextOption();
-			}
-			else if (wParam == VK_UP)
-			{
-				config_menu.PreviousOption();
-			}
-		}
+				    // Start timer to listen for gamepad input.
+				    SetTimer(GetMainHWND(), 1, 25, 0); // Fire timer 1 every 25 ms (generates WM_TIMER message).
+			    }
+		    }
+		    else if (config_menu.IsShowing())
+		    {
+			    if (wParam == VK_RETURN)
+			    {
+				    config_menu.ConfirmOption();
+			    }
+			    else if (wParam == VK_DOWN)
+			    {
+				    config_menu.NextOption();
+			    }
+			    else if (wParam == VK_UP)
+			    {
+				    config_menu.PreviousOption();
+			    }
+		    }
+        }
 
 		goto proco;
 	}

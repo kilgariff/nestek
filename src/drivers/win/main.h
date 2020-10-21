@@ -2,6 +2,8 @@
 #define WIN_MAIN_H
 
 #include "common.h"
+#include "splash_screen.h"
+
 #include <string>
 
 // #defines
@@ -30,6 +32,8 @@ typedef struct WMCopyStruct
 {
 	char strFilePath[2048];
 } DATA;
+
+extern SplashScreen splash_screen;
 
 extern int maxconbskip;
 extern int ffbskip;

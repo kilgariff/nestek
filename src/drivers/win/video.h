@@ -17,6 +17,8 @@
 #include "main.h"
 #include "window.h"
 
+#include <vector>
+
 enum DIRECTDRAW_MODES
 {
 	DIRECTDRAW_MODE_SOFTWARE,
@@ -64,6 +66,7 @@ void recalculateBestFitRect(int width, int height);
 int SetVideoMode(int fs);
 void DoVideoConfigFix();
 void FCEUD_BlitScreen(uint8 *XBuf);
+void BlitImage(uint8_t const * sourcePixelBytes, size_t sourcePixelByteCount);
 void ResetVideo();
 void SetFSVideoMode();
 void PushCurrentVideoSettings();
