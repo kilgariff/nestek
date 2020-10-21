@@ -1299,56 +1299,19 @@ void FCEUMOV_AddCommand(int cmd)
 
 void FCEU_DrawMovies(uint8 *XBuf)
 {
-	// not the best place, but just working
-	assert((NULL != osRecordingMovie) == (movieMode == MOVIEMODE_RECORD));
-
-	if (frame_display)
-	{
-		char counterbuf[32] = {0};
-		int color = 0x20;
-		
-		if (movieMode == MOVIEMODE_PLAY)
-		{
-			sprintf(counterbuf, "%d/%d%s%s", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
-		} else if (movieMode == MOVIEMODE_RECORD)
-		{
-			if (movieRecordMode == MOVIE_RECORD_MODE_TRUNCATE)
-				sprintf(counterbuf, "%d%s%s (record)", currFrameCounter, GetMovieRecordModeStr(), GetMovieReadOnlyStr()); // nearly classic
-			else
-				sprintf(counterbuf, "%d/%d%s%s (record)", currFrameCounter, (int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
-		} else if (movieMode == MOVIEMODE_FINISHED)
-		{
-			sprintf(counterbuf,"%d/%d%s%s (finished)",currFrameCounter,(int)currMovieData.records.size(), GetMovieRecordModeStr(), GetMovieReadOnlyStr());
-			color = 0x17; //Show red to get attention
-		} else if (movieMode == MOVIEMODE_TASEDITOR)
-		{
-			sprintf(counterbuf,"%d",currFrameCounter);
-		} else
-			sprintf(counterbuf,"%d (no movie)",currFrameCounter);
-
-		if (counterbuf[0])
-			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(30)+1, 256, (uint8*)counterbuf, color+0x80);
-	}
-	if (rerecord_display && movieMode != MOVIEMODE_INACTIVE)
-	{
-		char counterbuf[32] = {0};
-		sprintf(counterbuf, "%d", currMovieData.rerecordCount);
-
-		if (counterbuf[0])
-			DrawTextTrans(ClipSidesOffset+XBuf+FCEU_TextScanlineOffsetFromBottom(50)+1, 256, (uint8*)counterbuf, 0x28+0x80);
-	}
+    // NOTE(ross): I deleted this.
 }
 
 void FCEU_DrawLagCounter(uint8 *XBuf)
 {
-	if (lagCounterDisplay)
-	{
-		// If currently lagging - display red, else display green
-		uint8 color = (lagFlag) ? (0x16+0x80) : (0x2A+0x80);
-		sprintf(lagcounterbuf, "%d", lagCounter);
-		if(lagcounterbuf[0])
-			DrawTextTrans(ClipSidesOffset + XBuf + FCEU_TextScanlineOffsetFromBottom(40) + 1, 256, (uint8*)lagcounterbuf, color);
-	}
+	//if (lagCounterDisplay)
+	//{
+	//	// If currently lagging - display red, else display green
+	//	uint8 color = (lagFlag) ? (0x16+0x80) : (0x2A+0x80);
+	//	sprintf(lagcounterbuf, "%d", lagCounter);
+	//	if(lagcounterbuf[0])
+	//		DrawTextTrans(ClipSidesOffset + XBuf + FCEU_TextScanlineOffsetFromBottom(40) + 1, 256, (uint8*)lagcounterbuf, color);
+	//}
 }
 
 int FCEUMOV_WriteState(EMUFILE* os)

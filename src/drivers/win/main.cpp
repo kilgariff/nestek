@@ -66,6 +66,9 @@ extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 #include "wave.h"
 #include "video.h"
 #include "utils/xstring.h"
+
+#include "standalone_config.h"
+
 #include <string>
 #include <cstring>
 #include <codecvt>
@@ -210,6 +213,9 @@ bool DoInstantiatedExit=false;
 HWND DoInstantiatedExitWindow;
 
 SplashScreen splash_screen;
+StandaloneConfig default_config;
+StandaloneConfig user_config;
+StandaloneConfig * active_config = &default_config;
 
 // Internal functions
 void SetDirs()
@@ -527,6 +533,23 @@ void initDirectories()
 }
 */
 
+std::string get_path_to_exe()
+{
+    std::string path_to_exe;
+
+    WCHAR path[MAX_PATH];
+    GetModuleFileNameW(NULL, path, MAX_PATH);
+    std::wstring wide_str_path(path);
+    std::wstring::size_type pos = wide_str_path.find_last_of(L"\\/");
+    wide_str_path = wide_str_path.substr(0, pos);
+
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    path_to_exe = converter.to_bytes(wide_str_path);
+    
+    return path_to_exe;
+}
+
 static BOOL CALLBACK EnumCallbackFCEUXInstantiated(HWND hWnd, LPARAM lParam)
 {
 	//LPSTR lpClassName = '\0';
@@ -572,7 +595,14 @@ int main(int argc,char *argv[])
 
 	SetThreadAffinityMask(GetCurrentThread(),1);
 
-	//printf("%08x",opsize); //AGAIN?!
+    // Load default and user standalone configuration files.
+    LoadDefaultConfig(default_config);
+    if (default_config.enable_separate_user_config)
+    {
+        LoadUserConfig(default_config, user_config);
+        SaveUserConfig(default_config, user_config);
+        active_config = &user_config;
+    }
 
 	initArchiveSystem();
 
@@ -583,7 +613,10 @@ int main(int argc,char *argv[])
 
 	InitCommonControls();
 
-    splash_screen.LoadAndShow(5000);
+    if (active_config->show_splash_screen)
+    {
+        splash_screen.LoadAndShow(user_config.splash_screen_timeout_ms);
+    }
 
 	if(!FCEUI_Initialize())
 	{
@@ -597,24 +630,7 @@ int main(int argc,char *argv[])
 	// Get the base directory
 	GetBaseDirectory();
 
-	// load fceux.cfg
-	//sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
-	//LoadConfig(TempArray);
-
-	std::string path_to_exe;
-	{
-		WCHAR path[MAX_PATH];
-		GetModuleFileNameW(NULL, path, MAX_PATH);
-		std::wstring wide_str_path(path);
-		std::wstring::size_type pos = wide_str_path.find_last_of(L"\\/");
-		wide_str_path = wide_str_path.substr(0, pos);
-
-		using convert_type = std::codecvt_utf8<wchar_t>;
-		std::wstring_convert<convert_type, wchar_t> converter;
-		path_to_exe = converter.to_bytes(wide_str_path);
-	}
-
-	std::string const rom_file_path = path_to_exe + "\\game.nes";
+	std::string const rom_file_path = get_path_to_exe() + "\\game.nes";
 
 	fullscreen = 0;
 
@@ -628,15 +644,6 @@ int main(int argc,char *argv[])
 		disableBatteryLoading = 1;
 
 	int saved_pal_setting = !!pal_emulation;
-
-	if (ConfigToLoad)
-	{
-		// alternative config file specified
-		cfgFile.assign(ConfigToLoad);
-		// Load the config information
-		sprintf(TempArray,"%s\\%s",BaseDirectory.c_str(),cfgFile.c_str());
-		LoadConfig(TempArray);
-	}
 
 	//Bleh, need to find a better place for this.
 	{

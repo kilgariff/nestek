@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "splash_screen.h"
+#include "standalone_config.h"
 
 #include <string>
 
@@ -34,6 +35,9 @@ typedef struct WMCopyStruct
 } DATA;
 
 extern SplashScreen splash_screen;
+extern std::string get_path_to_exe();
+
+extern StandaloneConfig * active_config;
 
 extern int maxconbskip;
 extern int ffbskip;

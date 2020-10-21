@@ -189,7 +189,7 @@ void UpdateConfigMenu()
 
 void SetMainWindowText()
 {
-	SetWindowText(hAppWnd, "FLEA!");
+	SetWindowText(hAppWnd, active_config->game_name.c_str());
 }
 
 bool HasRecentFiles()
@@ -924,7 +924,6 @@ bool ALoad(const char *nameo, char* innerFilename, bool silent)
 	}
 	else
 	{
-		SetWindowText(hAppWnd, FCEU_NAME_AND_VERSION);	//adelikat: If game fails to load while a previous one was open, the previous would have been closed, so reflect that in the window caption
 		return false;
 	}
 	

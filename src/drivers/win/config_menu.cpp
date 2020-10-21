@@ -39,8 +39,8 @@ static char const * config_remap_option_str_array[config_remap_option_count] = {
 	"Down",
 	"Left",
 	"Right",
-	"Reset",
-	"Finished"
+	"Reset Mapping",
+	"Finished Mapping"
 };
 
 char const * config_remap_option_to_string(ConfigOption const option)

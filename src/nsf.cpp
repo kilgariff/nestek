@@ -566,13 +566,13 @@ void DrawNSF(uint8 *XBuf)
 	}
 
 	static const int kFgColor = 1;
-	DrawTextTrans(ClipSidesOffset+XBuf+10*256+4+(((31-strlen((char*)NSFHeader.SongName))<<2)), 256, NSFHeader.SongName, kFgColor);
-	DrawTextTrans(ClipSidesOffset+XBuf+26*256+4+(((31-strlen((char*)NSFHeader.Artist))<<2)), 256,NSFHeader.Artist, kFgColor);
-	DrawTextTrans(ClipSidesOffset+XBuf+42*256+4+(((31-strlen((char*)NSFHeader.Copyright))<<2)), 256,NSFHeader.Copyright, kFgColor);
+	//DrawTextTrans(ClipSidesOffset+XBuf+10*256+4+(((31-strlen((char*)NSFHeader.SongName))<<2)), 256, NSFHeader.SongName, kFgColor);
+	//DrawTextTrans(ClipSidesOffset+XBuf+26*256+4+(((31-strlen((char*)NSFHeader.Artist))<<2)), 256,NSFHeader.Artist, kFgColor);
+	//DrawTextTrans(ClipSidesOffset+XBuf+42*256+4+(((31-strlen((char*)NSFHeader.Copyright))<<2)), 256,NSFHeader.Copyright, kFgColor);
 
-	DrawTextTrans(ClipSidesOffset+XBuf+70*256+4+(((31-strlen("Song:"))<<2)), 256, (uint8*)"Song:", kFgColor);
+	//DrawTextTrans(ClipSidesOffset+XBuf+70*256+4+(((31-strlen("Song:"))<<2)), 256, (uint8*)"Song:", kFgColor);
 	sprintf(snbuf,"<%d/%d>",CurrentSong,NSFHeader.TotalSongs);
-	DrawTextTrans(XBuf+82*256+4+(((31-strlen(snbuf))<<2)), 256, (uint8*)snbuf, kFgColor);
+	//DrawTextTrans(XBuf+82*256+4+(((31-strlen(snbuf))<<2)), 256, (uint8*)snbuf, kFgColor);
 
 	{
 		static uint8 last=0;

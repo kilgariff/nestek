@@ -161,35 +161,10 @@ void DrawMessage(bool beforeMovie)
 			if(guiMessage.howlong <= 24) color = 0x21;
 			if(guiMessage.howlong <= 16) color = 0x51;
 			if(guiMessage.howlong <=  8) color = 0x41;
-			DrawTextTrans(ClipSidesOffset+t, 256, (uint8 *)guiMessage.errmsg, color+0x80);
-		}
-	}
-
-	if(subtitleMessage.howlong)
-	{
-		//don't display movie messages if we're not before the movie
-		if(beforeMovie && !subtitleMessage.isMovieMessage)
-			return;
-
-		uint8 *tt;
-		subtitleMessage.howlong--;
-		tt=XBuf+FCEU_TextScanlineOffsetFromBottom(216);
-
-		if(tt>=XBuf)
-		{
-			int color = 0x20;
-			if(subtitleMessage.howlong == 39) color = 0x38;
-			if(subtitleMessage.howlong <= 30) color = 0x2C;
-			if(subtitleMessage.howlong <= 20) color = 0x1C;
-			if(subtitleMessage.howlong <= 10) color = 0x11;
-			if(subtitleMessage.howlong <= 5) color = 0x1;
-			DrawTextTrans(ClipSidesOffset+tt, 256, (uint8 *)subtitleMessage.errmsg, color+0x80);
+			DrawTextTrans(ClipSidesOffset+t, 256, (uint8 *)guiMessage.errmsg, 0xC0, color+0x80);
 		}
 	}
 }
-
-
-
 
 static uint8 sstat[2541] =
 {
@@ -403,7 +378,7 @@ static int JoedCharWidth(uint8 ch)
 
 char target[256][256];
 
-void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 fgcolor, int max_w, int max_h, int border)
+void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 bgcolor, uint8 fgcolor, int max_w, int max_h, int border)
 {
 	int beginx=2, x=beginx;
 	int y=2;
@@ -510,7 +485,7 @@ textoverflow:
 			}
 			else
 			{
-				dest[offs] = 0xC1;
+				dest[offs] = bgcolor;
 			}
 			//
 			//{
@@ -542,7 +517,7 @@ textoverflow:
 	}
 }
 
-void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 fgcolor)
+void DrawTextTrans(uint8 *dest, uint32 width, uint8 *textmsg, uint8 bgcolor, uint8 fgcolor)
 {
-	DrawTextTransWH(dest, width, textmsg, fgcolor, 256, 16, 2);
+	DrawTextTransWH(dest, width, textmsg, bgcolor, fgcolor, 256, 16, 2);
 }
