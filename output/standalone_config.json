@@ -1,0 +1,6 @@
+{
+    "game_name": "Ross Test",
+    "enable_separate_user_config": false,
+    "show_splash_screen": true,
+    "splash_screen_timeout_ms": 3000
+}

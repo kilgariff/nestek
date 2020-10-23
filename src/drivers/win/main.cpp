@@ -217,6 +217,100 @@ StandaloneConfig default_config;
 StandaloneConfig user_config;
 StandaloneConfig * active_config = &default_config;
 
+void SaveGamepadConfig()
+{
+    // Only save out the gamepad config if separate user config is enabled.
+    if (active_config->enable_separate_user_config == false)
+    {
+        return;
+    }
+
+    active_config->button_mappings.clear();
+
+    for (size_t player_idx = 0; player_idx < 2; ++player_idx)
+    {
+        ButtonMapping player_button_mapping;
+
+        for (size_t nes_button = NESButton::ButtonA; nes_button < NESButton::COUNT; ++nes_button)
+        {
+            ButtConfig * bc = &GetGamePadConfig(player_idx)[nes_button];
+
+            bool const has_keyboard = bc->NumC >= 1 && bc->ButtType[0] == BUTTC_KEYBOARD;
+
+            player_button_mapping.keyboard_devices[nes_button] = has_keyboard ? bc->DeviceNum[0] : ButtonMapping::sentinel;
+            player_button_mapping.keyboard_keys[nes_button] = has_keyboard ? bc->ButtonNum[0] : ButtonMapping::sentinel;
+
+            bool const has_gamepad = bc->NumC > 1 && bc->ButtType[1] == BUTTC_JOYSTICK;
+
+            player_button_mapping.gamepad_devices[nes_button] = has_gamepad ? bc->DeviceNum[1] : ButtonMapping::sentinel;
+            player_button_mapping.gamepad_buttons[nes_button] = has_gamepad ? bc->ButtonNum[1] : ButtonMapping::sentinel;
+        }
+
+        active_config->button_mappings.emplace_back(std::move(player_button_mapping));
+    }
+
+    SaveUserConfig(default_config, user_config);
+}
+
+void SetupGamepadConfig()
+{
+    for (size_t player_idx = 0; player_idx < active_config->button_mappings.size(); ++player_idx)
+    {
+        auto const & player_button_mapping = active_config->button_mappings[player_idx];
+
+        for (size_t nes_button = NESButton::ButtonA; nes_button < NESButton::COUNT; ++nes_button)
+        {
+            uint32_t const keyboard_device = player_button_mapping.keyboard_devices[nes_button];
+            uint32_t const keyboard_key = player_button_mapping.keyboard_keys[nes_button];
+
+            uint32_t const gamepad_device = player_button_mapping.gamepad_devices[nes_button];
+            uint32_t const gamepad_button = player_button_mapping.gamepad_buttons[nes_button];
+            
+            bool const has_keyboard = keyboard_device != ButtonMapping::sentinel;
+            bool const has_gamepad = gamepad_device != ButtonMapping::sentinel;
+
+            ButtConfig * bc = GetGamePadConfig(player_idx) + nes_button;
+
+            bc->NumC = 0;
+            bc->ButtType[0] = 0;
+            bc->DeviceNum[0] = 0;
+            bc->ButtonNum[0] = 0;
+
+            if (has_keyboard)
+            {
+                bc->NumC = 1;
+                bc->ButtType[0] = BUTTC_KEYBOARD;
+                bc->DeviceNum[0] = keyboard_device;
+                bc->ButtonNum[0] = keyboard_key;
+            }
+
+            if (has_gamepad)
+            {
+                bc->NumC = 2;
+                bc->ButtType[1] = BUTTC_JOYSTICK;
+                bc->DeviceNum[1] = gamepad_device;
+                bc->ButtonNum[1] = gamepad_button;
+            }
+        }
+    }
+}
+
+void LoadDefaultGamepadConfig(size_t player_idx)
+{
+    if (default_config.button_mappings.size() > player_idx)
+    {
+        if (active_config->button_mappings.size() <= player_idx)
+        {
+            active_config->button_mappings.resize(player_idx + 1);
+        }
+
+        active_config->button_mappings[player_idx] = default_config.button_mappings[player_idx];
+    }
+
+    SetupGamepadConfig();
+    SaveGamepadConfig();
+}
+
 // Internal functions
 void SetDirs()
 {
@@ -302,8 +396,6 @@ void CreateDirs()
 {
 	DefaultDirectoryWalker(DirectoryCreator);
 }
-
-
 
 //Fills the BaseDirectory string
 //TODO: Potential buffer overflow caused by limited size of BaseDirectory?
@@ -480,8 +572,8 @@ static void DriverKill(void)
 {
 	// Save config file
 	//sprintf(TempArray, "%s/fceux.cfg", BaseDirectory.c_str());
-	sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
-	SaveConfig(TempArray);
+	//sprintf(TempArray, "%s/%s", BaseDirectory.c_str(),cfgFile.c_str());
+	//SaveConfig(TempArray);
 
 	DestroyInput();
 
@@ -751,6 +843,8 @@ int main(int argc,char *argv[])
 		AviToLoad = NULL;
 	}
 
+    SetupGamepadConfig();
+
 	if (PauseAfterLoad) FCEUI_ToggleEmulationPause();
 	SetAutoFirePattern(AFon, AFoff);
 	UpdateCheckedMenuItems();
@@ -781,12 +875,9 @@ doloopy:
 			}
 			else skippy = 0;
 
-            if (splash_screen.IsShowing() == false)
-            {
-			    FCEUI_Emulate(&gfx, &sound, &ssize, skippy); //emulate a single frame
-            }
-
+            FCEUI_Emulate(&gfx, &sound, &ssize, skippy); //emulate a single frame
             FCEUD_Update(gfx, sound, ssize); //update displays and debug tools
+
             UpdateConfigMenu();
 
 			//mbg 6/30/06 - close game if we were commanded to by calls nested in FCEUI_Emulate()
@@ -805,6 +896,8 @@ doloopy:
 	Sleep(50);
 	if(!exiting)
 		goto doloopy;
+
+    FCEU_SaveGameSave();
 
 	DriverKill();
 	timeEndPeriod(1);
@@ -859,68 +952,81 @@ void win_debuggerLoop()
 // Update the game and gamewindow with a new frame
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
-	if (splash_screen.IsShowing())
-	{
-		BlitImage(splash_screen.GetBytes(), splash_screen.GetByteCount());
-	}
+    win_SoundSetScale(fps_scale); //If turboing and mute turbo is true, bypass this
+
+    //write all the sound we generated.
+    if (soundo && Buffer && Count && !(muteTurbo && turbo))
+    {
+        win_SoundWriteData(Buffer, Count); //If turboing and mute turbo is true, bypass this
+    }
+
+    if (splash_screen.IsShowing())
+    {
+        BlitImage(splash_screen.GetBytes(), splash_screen.GetByteCount());
+    }
     else
     {
-        win_SoundSetScale(fps_scale); //If turboing and mute turbo is true, bypass this
-
-        //write all the sound we generated.
-        if (soundo && Buffer && Count && !(muteTurbo && turbo))
-        {
-            win_SoundWriteData(Buffer, Count); //If turboing and mute turbo is true, bypass this
-        }
+        splash_screen.Unload();
 
         //blit the framebuffer
         if (XBuf)
             FCEUD_BlitScreen(XBuf);
-
-	    extern bool JustFrameAdvanced;
-
-        if (!FCEUI_EmulationPaused()
-            || JustFrameAdvanced
-            )
-        {
-            //then throttle 
-            while (SpeedThrottle())
-            {
-                FCEUD_UpdateInput();
-                _updateWindow();
-            }
-        }
-
-	    //sleep just to be polite
-	    if(!JustFrameAdvanced && FCEUI_EmulationPaused()) {
-		    Sleep(50);
-	    }
-
-	    //while(EmulationPaused==1 && inDebugger)
-	    //{
-	    //	Sleep(50);
-	    //	BlockingCheck();
-	    //	FCEUD_UpdateInput(); //should this update the CONTROLS??? or only the hotkeys etc?
-	    //}
-
-	    ////so, we're not paused anymore.
-
-	    ////something of a hack, but straightforward:
-	    ////if we were paused, but not in the debugger, then unpause ourselves and step.
-	    ////this is so that the cpu won't cut off execution due to being paused, but the debugger _will_
-	    ////cut off execution as soon as it makes it into the main cpu cycle loop
-	    //if(FCEUI_EmulationPaused() && !inDebugger) {
-	    //	FCEUI_ToggleEmulationPause();
-	    //	FCEUI_Debugger().step = 1;
-	    //	FCEUD_DebugBreakpoint();
-	    //}
     }
 
     //update debugging displays
     _updateWindow();
 
-	//make sure to update the input once per frame
-	FCEUD_UpdateInput();
+    extern bool JustFrameAdvanced;
+
+    //MBG TODO - think about this logic
+    //throttle
+
+    bool throttle = true;
+    if ((eoptions&EO_NOTHROTTLE))
+    {
+        if (!soundo) throttle = false;
+    }
+
+    if (throttle)  //if throttling is enabled..
+        if (!turbo) //and turbo is disabled..
+            if (!FCEUI_EmulationPaused()
+                || JustFrameAdvanced
+                )
+                //then throttle
+                while (SpeedThrottle())
+                {
+                    FCEUD_UpdateInput();
+                    _updateWindow();
+                }
+
+
+    //sleep just to be polite
+    if (!JustFrameAdvanced && FCEUI_EmulationPaused())
+    {
+        Sleep(50);
+    }
+
+    //while(EmulationPaused==1 && inDebugger)
+    //{
+    //	Sleep(50);
+    //	BlockingCheck();
+    //	FCEUD_UpdateInput(); //should this update the CONTROLS??? or only the hotkeys etc?
+    //}
+
+    ////so, we're not paused anymore.
+
+    ////something of a hack, but straightforward:
+    ////if we were paused, but not in the debugger, then unpause ourselves and step.
+    ////this is so that the cpu won't cut off execution due to being paused, but the debugger _will_
+    ////cut off execution as soon as it makes it into the main cpu cycle loop
+    //if(FCEUI_EmulationPaused() && !inDebugger) {
+    //	FCEUI_ToggleEmulationPause();
+    //	FCEUI_Debugger().step = 1;
+    //	FCEUD_DebugBreakpoint();
+    //}
+
+    //make sure to update the input once per frame
+    FCEUD_UpdateInput();
 }
 
 static void FCEUD_MakePathDirs(const char *fname)

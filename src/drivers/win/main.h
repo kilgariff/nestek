@@ -39,6 +39,9 @@ extern std::string get_path_to_exe();
 
 extern StandaloneConfig * active_config;
 
+void SaveGamepadConfig();
+void LoadDefaultGamepadConfig(size_t player_idx);
+
 extern int maxconbskip;
 extern int ffbskip;
 extern void LoadNewGamey(HWND hParent, const char *initialdir);

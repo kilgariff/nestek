@@ -187,7 +187,7 @@ void ConfigMenu::ConfirmOption()
 
 			case ConfigRemapOption::ResetToDefault:
 			{
-				// TODO(ross): Reset button mapping to default.
+                LoadDefaultGamepadConfig(current_config_option == ConfigOption::RemapButtonsP1 ? 0 : 1);
 				break;
 			}
 

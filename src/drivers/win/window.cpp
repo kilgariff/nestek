@@ -1405,6 +1405,8 @@ adelikat: Outsourced this to a remappable hotkey
 						bc->DeviceInstance[1] = guid;
 
 						config_menu.StopAwaitingKey();
+
+                        SaveGamepadConfig();
 					}
 				}
 				else
@@ -1467,6 +1469,8 @@ adelikat: Outsourced this to a remappable hotkey
 				    bc->ButtType[0] = BUTTC_KEYBOARD;
 				    bc->DeviceNum[0] = 0;
 				    bc->ButtonNum[0] = key_code;
+
+                    SaveGamepadConfig();
 			    }
 		    }
 		    else if (wParam == VK_ESCAPE)
@@ -1692,7 +1696,7 @@ int CreateMainWindow()
 	winclass.cbClsExtra = 0;
 	winclass.cbWndExtra = 0;
 	winclass.hInstance = fceu_hInstance;
-	winclass.hIcon = 0; // LoadIcon(fceu_hInstance, "ICON_1");
+	winclass.hIcon = (HICON) LoadImage(fceu_hInstance, "icon.ico", IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
 	winclass.hIconSm = 0; // LoadIcon(fceu_hInstance, "ICON_1");
 	winclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	winclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH); //mbg merge 7/17/06 added cast
