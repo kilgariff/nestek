@@ -5,6 +5,7 @@
 enum class ConfigOption : uint8_t
 {
     BackToGame,
+    ToggleFullscreen,
     RemapButtonsP1,
     RemapButtonsP2,
     DeleteSave,

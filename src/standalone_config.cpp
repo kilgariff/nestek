@@ -61,6 +61,7 @@ void StandaloneConfig::LoadFromFile(std::string const file_path)
     {
         game_name = d["game_name"].GetString();
         enable_separate_user_config = d["enable_separate_user_config"].GetBool();
+        start_fullscreen = d["start_fullscreen"].GetBool();
         show_splash_screen = d["show_splash_screen"].GetBool();
         splash_screen_timeout_ms = d["splash_screen_timeout_ms"].GetUint64();
 
@@ -125,6 +126,7 @@ void StandaloneConfig::SaveToFile(std::string const file_path)
     
         d.AddMember("game_name", StringRef(game_name.c_str()), d.GetAllocator());
         d.AddMember("enable_separate_user_config", enable_separate_user_config, d.GetAllocator());
+        d.AddMember("start_fullscreen", start_fullscreen, d.GetAllocator());
         d.AddMember("show_splash_screen", show_splash_screen, d.GetAllocator());
         d.AddMember("splash_screen_timeout_ms", splash_screen_timeout_ms, d.GetAllocator());
 

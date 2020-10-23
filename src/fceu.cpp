@@ -153,6 +153,11 @@ void FCEU_TogglePPU(void) {
 #endif
 }
 
+void FCEU_ClearSave(void)
+{
+    GameInterface(GI_RESETSAVEFILE);
+}
+
 static void FCEU_CloseGame(void)
 {
 	if (GameInfo)
@@ -744,7 +749,6 @@ void ResetNES(void) {
 
 	FCEU_DispMessage("Reset", 0);
 }
-
 
 int RAMInitSeed = 0;
 int RAMInitOption = 0;

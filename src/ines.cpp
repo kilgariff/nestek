@@ -90,6 +90,9 @@ static void iNES_ExecPower() {
 
 void iNESGI(GI h) { //bbit edited: removed static keyword
 	switch (h) {
+    case GI_RESETSAVEFILE:
+        FCEU_ClearGameSaveFile(&iNESCart);
+        break;
 	case GI_RESETSAVE:
 		FCEU_ClearGameSave(&iNESCart);
 		break;

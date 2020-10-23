@@ -37,6 +37,8 @@ void ResetMapping(void);
 void ResetNES(void);
 void PowerNES(void);
 
+void FCEU_ClearSave(void);
+
 void SetAutoFireOffset(int offset);
 void SetAutoFirePattern(int onframes, int offframes);
 void AutoFire(void);
@@ -80,7 +82,8 @@ enum GI {
 	GI_RESETM2	=1,
 	GI_POWER =2,
 	GI_CLOSE =3,
-	GI_RESETSAVE = 4
+	GI_RESETSAVE = 4,
+    GI_RESETSAVEFILE = 5
 };
 
 extern void (*GameInterface)(GI h);

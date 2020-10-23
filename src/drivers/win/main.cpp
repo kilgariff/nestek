@@ -252,6 +252,13 @@ void SaveGamepadConfig()
     SaveUserConfig(default_config, user_config);
 }
 
+void ToggleFullscreenConfig()
+{
+    active_config->start_fullscreen = !active_config->start_fullscreen;
+    SaveUserConfig(default_config, user_config);
+    SetVideoMode(active_config->start_fullscreen);
+}
+
 void SetupGamepadConfig()
 {
     for (size_t player_idx = 0; player_idx < active_config->button_mappings.size(); ++player_idx)
@@ -559,10 +566,10 @@ int DriverInitialize()
 	if(soundo)
 		soundo = InitSound();
 
-	SetVideoMode(fullscreen);
+	SetVideoMode(0);
 
 	// NOTE(ross): This forces fullscreen, but messes up debugging. Only do this for the final build.
-	//SetVideoMode(1);
+	SetVideoMode(active_config->start_fullscreen);
 	InitInputStuff();             /* Initialize DInput interfaces. */
 
 	return 1;
@@ -896,8 +903,6 @@ doloopy:
 	Sleep(50);
 	if(!exiting)
 		goto doloopy;
-
-    FCEU_SaveGameSave();
 
 	DriverKill();
 	timeEndPeriod(1);

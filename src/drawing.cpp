@@ -137,11 +137,11 @@ void DrawMessage(bool beforeMovie)
 
 		//guiMessage.howlong--;
 
-		if (guiMessage.linesFromBottom > 0)
+		/*if (guiMessage.linesFromBottom > 0)
 			t=XBuf+FCEU_TextScanlineOffsetFromBottom(guiMessage.linesFromBottom)+1;
 		else
 			t=XBuf+FCEU_TextScanlineOffsetFromBottom(20)+1;
-
+*/
 		/*
 		FCEU palette:
 		$00: [8] unvpalette found in palettes/palettes.h
@@ -153,16 +153,13 @@ void DrawMessage(bool beforeMovie)
 
 		*/
 
-		if(t>=XBuf)
-		{
-			int color = 0x20;
-			if(guiMessage.howlong <= 40) color = 0x3C;
-			if(guiMessage.howlong <= 32) color = 0x31;
-			if(guiMessage.howlong <= 24) color = 0x21;
-			if(guiMessage.howlong <= 16) color = 0x51;
-			if(guiMessage.howlong <=  8) color = 0x41;
-			DrawTextTrans(ClipSidesOffset+t, 256, (uint8 *)guiMessage.errmsg, 0xC0, color+0x80);
-		}
+		int color = 0x20;
+		if(guiMessage.howlong <= 40) color = 0x3C;
+		if(guiMessage.howlong <= 32) color = 0x31;
+		if(guiMessage.howlong <= 24) color = 0x21;
+		if(guiMessage.howlong <= 16) color = 0x51;
+		if(guiMessage.howlong <=  8) color = 0x41;
+		DrawTextTrans(XBackBuf, 256, (uint8 *)guiMessage.errmsg, 0xC0, color+0x80);
 	}
 }
 
@@ -376,14 +373,12 @@ static int JoedCharWidth(uint8 ch)
 	return Font6x7[FixJoedChar(ch)*8];
 }
 
-char target[256][256];
-
 void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 bgcolor, uint8 fgcolor, int max_w, int max_h, int border)
 {
 	int beginx=2, x=beginx;
 	int y=2;
 
-	memset(target, 0, 256 * 256);
+    memset(dest, bgcolor, 256 * 256);
 
 	assert(width==256);
 	if (max_w > 256) max_w = 256;
@@ -421,13 +416,9 @@ void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 bgcolor, uint
 					if (y + ny >= 254)
 					{
 						// Max border is 2, so the max safe y is 254 (since 256 is the max for the target array
-						goto textoverflow;
+                        return;
 					}
-					target[y + ny][x + nx] = 2;
-				}
-				else
-				{
-					target[y + ny][x + nx] = 1;
+                    dest[(y + ny) * 256 + x + nx] = fgcolor;
 				}
 			}
 		}
@@ -435,85 +426,6 @@ void DrawTextTransWH(uint8 *dest, int width, uint8 *textmsg, uint8 bgcolor, uint
 		x += wid;
 		if (max_x < x)
 			max_x = x;
-	}
-textoverflow:
-
-	max_x += 2;
-	if (max_x > width)
-		max_x = width;
-	int max_y = y + ny + 2;
-	if (max_y > 254)
-		max_y = 254;
-
-	// draw target buffer to screen buffer
-	int idx = 0;
-	for (y = 0; y < 256; ++y)
-	{
-		for (x = 0; x < 256; ++x)
-		{
-			offs = y * width + x;
-			pixel_color = target[y][x] * 100;
-
-			//if(border>=1)
-			//{
-			//	x>=(     1) && (pixel_color += target[y][x-1]);
-			//	x<(width-1) && (pixel_color += target[y][x+1]);
-			//	y>=(     1) && (pixel_color += target[y-1][x]);
-			//	y<(16   -1) && (pixel_color += target[y+1][x]);
-			//}
-			//if(border>=2)
-			//{
-			//	x>=(     1) && (pixel_color += target[y][x-1]*10);
-			//	x<(width-1) && (pixel_color += target[y][x+1]*10);
-			//	y>=(     1) && (pixel_color += target[y-1][x]*10);
-			//	y<(16   -1) && (pixel_color += target[y+1][x]*10);
-
-			//	x>=(     1) && y>=(  1) && (pixel_color += target[y-1][x-1]);
-			//	x<(width-1) && y>=(  1) && (pixel_color += target[y-1][x+1]);
-			//	x>=(     1) && y<(16-1) && (pixel_color += target[y+1][x-1]);
-			//	x<(width-1) && y<(16-1) && (pixel_color += target[y+1][x+1]);
-
-			//	x>=(     2) && (pixel_color += target[y][x-2]);
-			//	x<(width-2) && (pixel_color += target[y][x+2]);
-			//	y>=(     2) && (pixel_color += target[y-2][x]);
-			//	y<(16   -2) && (pixel_color += target[y+2][x]);
-			//}
-
-			if (pixel_color >= 200)
-			{
-				dest[offs] = fgcolor;
-			}
-			else
-			{
-				dest[offs] = bgcolor;
-			}
-			//
-			//{
-			//	dest[offs] = 0xD1;
-
-			//	//if (guiMessage.howlong <= 40) color = 0x3C;
-			//	//if (guiMessage.howlong <= 32) color = 0x31;
-			//	//if (guiMessage.howlong <= 24) color = 0x21;
-			//	//if (guiMessage.howlong <= 16) color = 0x51;
-			//	//if (guiMessage.howlong <= 8) color = 0x41;
-			//}
-
-			++idx;
-
-			//else if(pixel_color >= 10)
-			//{
-			//	if(dest[offs] < 0xA0)
-			//		dest[offs] = 0xC1;
-			//	else
-			//		dest[offs] = 0xD1;
-			//}
-			//else if(pixel_color > 0)
-			//{
-			//	dest[offs] = 0xCF;
-			//}
-		}
-
-		++idx;
 	}
 }
 

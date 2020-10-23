@@ -34,6 +34,7 @@ public:
     // Settings.
     std::string game_name = "FCEUX_Standalone";
     bool enable_separate_user_config = true;
+    bool start_fullscreen = true;
     bool show_splash_screen = true;
     uint64_t splash_screen_timeout_ms = 2000;
 

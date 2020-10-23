@@ -1,6 +1,8 @@
 #include "config_menu.h"
 #include "driver.h"
 
+#include "fceu.h"
+
 // TODO(ross): This is windows-specific. If we're porting to other platforms we'll need a more general gamepad interface.
 #include "drivers/win/main.h"
 #include "drivers/win/input.h"
@@ -13,6 +15,7 @@ constexpr size_t config_option_count =
 
 static char const * config_option_str_array[config_option_count] = {
 	"Back to game",
+    "Toggle Fullscreen",
 	"Remap buttons (player 1)",
 	"Remap buttons (player 2)",
 	"Delete save game",
@@ -150,6 +153,12 @@ void ConfigMenu::ConfirmOption()
 				break;
 			}
 
+            case ConfigOption::ToggleFullscreen:
+            {
+                ToggleFullscreenConfig();
+                break;
+            }
+
 			case ConfigOption::RemapButtonsP1:
 			{
 				BeginRemap(0);
@@ -165,6 +174,13 @@ void ConfigMenu::ConfirmOption()
 				BeginRemap(1);
 				break;
 			}
+
+            case ConfigOption::DeleteSave:
+            {
+                FCEU_ClearSave();
+                ResetNES();
+                break;
+            }
 
 			case ConfigOption::ExitGame:
 			{

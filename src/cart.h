@@ -33,6 +33,7 @@ extern CartInfo *currCartInfo;
 void FCEU_SaveGameSave(CartInfo *LocalHWInfo);
 void FCEU_LoadGameSave(CartInfo *LocalHWInfo);
 void FCEU_ClearGameSave(CartInfo *LocalHWInfo);
+void FCEU_ClearGameSaveFile(CartInfo *LocalHWInfo);
 
 extern uint8 *Page[32], *VPage[8], *MMC5SPRVPage[8], *MMC5BGVPage[8];
 

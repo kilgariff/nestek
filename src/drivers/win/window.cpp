@@ -133,7 +133,7 @@ static int vchanged = 0;
 int menuYoffset = 0;
 bool wasPausedByCheats = false;		//For unpausing the emulator if paused by the cheats dialog
 bool rightClickEnabled = false;		//If set to false, the right click context menu will be disabled.
-bool fullscreenByDoubleclick = false;
+bool fullscreenByDoubleclick = true;
 uint8 BWorldData[1 + 13 + 1];
 
 //Config Menu-------------------------------------
@@ -1166,16 +1166,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 	case WM_LBUTTONDBLCLK:
 	{
-		/*if (fullscreenByDoubleclick)
-		{
-			extern void ToggleFullscreen();
-			ToggleFullscreen();
-			return 0;
-		} else
-		{
-			mouseb=wParam;
-			goto proco;
-		}*/
+        if (fullscreenByDoubleclick)
+        {
+            ToggleFullscreenConfig();
+            return 0;
+        }
 		break;
 	}
 
