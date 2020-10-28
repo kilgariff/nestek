@@ -1383,54 +1383,57 @@ adelikat: Outsourced this to a remappable hotkey
 		{
 			if (just_pressed)
 			{
-				if (config_menu.IsAwaitingKey())
-				{
-					if (config_menu.GetState() == ConfigMenuState::RemapPlayer1 ||
-						config_menu.GetState() == ConfigMenuState::RemapPlayer2)
-					{
-						size_t const player_idx =
-							config_menu.GetState() == ConfigMenuState::RemapPlayer1 ? 0 : 1;
+                if (config_menu.IsShowing())
+                {
+				    if (config_menu.IsAwaitingKey())
+				    {
+					    if (config_menu.GetState() == ConfigMenuState::RemapPlayer1 ||
+						    config_menu.GetState() == ConfigMenuState::RemapPlayer2)
+					    {
+						    size_t const player_idx =
+							    config_menu.GetState() == ConfigMenuState::RemapPlayer1 ? 0 : 1;
 
-						ButtConfig * bc = &GetGamePadConfig(player_idx)[size_t(config_menu.GetCurrentRemapOption())];
+						    ButtConfig * bc = &GetGamePadConfig(player_idx)[size_t(config_menu.GetCurrentRemapOption())];
 
-						bc->NumC = 2;
-						bc->ButtType[1] = BUTTC_JOYSTICK;
-						bc->DeviceNum[1] = devicenum;
-						bc->ButtonNum[1] = buttonnum;
-						bc->DeviceInstance[1] = guid;
+						    bc->NumC = 2;
+						    bc->ButtType[1] = BUTTC_JOYSTICK;
+						    bc->DeviceNum[1] = devicenum;
+						    bc->ButtonNum[1] = buttonnum;
+						    bc->DeviceInstance[1] = guid;
 
-						config_menu.StopAwaitingKey();
+						    config_menu.StopAwaitingKey();
 
-                        SaveGamepadConfig();
-					}
-				}
-				else
-				{
-					// Joystick up or direction up.
-					if (buttonnum == 49153 || buttonnum == 8192)
-					{
-						config_menu.PreviousOption();
-					}
+                            SaveGamepadConfig();
+					    }
+				    }
+				    else
+				    {
+					    // Joystick up or direction up.
+					    if (buttonnum == 49153 || buttonnum == 8192)
+					    {
+						    config_menu.PreviousOption();
+					    }
 
-					// Joystick down or direction down.
-					else if (buttonnum == 32769 || buttonnum == 8194)
-					{
-						config_menu.NextOption();
-					}
+					    // Joystick down or direction down.
+					    else if (buttonnum == 32769 || buttonnum == 8194)
+					    {
+						    config_menu.NextOption();
+					    }
 
-					// Button A.
-					else if (buttonnum == 0)
-					{
-						config_menu.ConfirmOption();
-					}
+					    // Button A.
+					    else if (buttonnum == 0)
+					    {
+						    config_menu.ConfirmOption();
+					    }
 
-					// Button B.
-					else if (buttonnum == 1)
-					{
-						config_menu.Hide();
-					}
-				}
-			}
+					    // Button B.
+					    else if (buttonnum == 1)
+					    {
+						    config_menu.Hide();
+					    }
+				    }
+			    }
+            }
 
 			just_pressed = false;
 		}
