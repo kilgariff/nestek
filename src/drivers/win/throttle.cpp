@@ -50,8 +50,10 @@ static uint64 GetCurTime(void)
   return(tmp);
  }
  else
-  return((uint64)GetTickCount());
-
+ {
+     // NOTE(ross): This would use GetTickCount() but I think that might be flagging us as malware.
+     return 0;
+ }
 }
 
 void InitSpeedThrottle(void)

@@ -52,7 +52,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
-#include <zlib.h>
 
 //XBuf:
 //0-63 is reserved for 7 special colours used by FCEUX (overlay, etc.)
@@ -438,7 +437,8 @@ void FCEU_ResetMessages()
 
 static int WritePNGChunk(FILE *fp, uint32 size, const char *type, uint8 *data)
 {
-	uint32 crc;
+    // NOTE(ross): No need to write PNGs in NESTER.
+	/*uint32 crc;
 
 	uint8 tempo[4];
 
@@ -466,7 +466,7 @@ static int WritePNGChunk(FILE *fp, uint32 size, const char *type, uint8 *data)
 	tempo[3]=crc;
 
 	if(fwrite(tempo,4,1,fp)!=1)
-		return 0;
+		return 0;*/
 	return 1;
 }
 
@@ -500,195 +500,17 @@ int GetScreenPixelPalette(int x, int y, bool usebackup) {
 
 int SaveSnapshot(void)
 {
-	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
-	int x,u,y;
-	FILE *pp=NULL;
-	uint8 *compmem=NULL;
-	uLongf compmemsize=(totallines*263+12)*3;
-
-	if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
-		return 0;
-
-	for (u = lastu; u < 99999; ++u)
-	{
-		pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"rb");
-		if(pp==NULL) break;
-		fclose(pp);
-	}
-	lastu = u;
-
-	if(!(pp=FCEUD_UTF8fopen(FCEU_MakeFName(FCEUMKF_SNAP,u,"png").c_str(),"wb")))
-	{
-		free(compmem);
-		return 0;
-	}
-
-	{
-		static const uint8 header[8]={137,80,78,71,13,10,26,10};
-		if(fwrite(header,8,1,pp)!=1)
-			goto PNGerr;
-	}
-
-	{
-		uint8 chunko[13];
-
-		chunko[0]=chunko[1]=chunko[3]=0;
-		chunko[2]=0x1;			// Width of 256
-
-		chunko[4]=chunko[5]=chunko[6]=0;
-		chunko[7]=totallines;			// Height
-
-		chunko[8]=8;				// 8 bits per sample(24 bits per pixel)
-		chunko[9]=2;				// Color type; RGB triplet
-		chunko[10]=0;				// compression: deflate
-		chunko[11]=0;				// Basic adapative filter set(though none are used).
-		chunko[12]=0;				// No interlace.
-
-		if(!WritePNGChunk(pp,13,"IHDR",chunko))
-			goto PNGerr;
-	}
-
-	{
-		uint8 *tmp=XBuf+FSettings.FirstSLine*256;
-		uint8 *dest,*mal,*mork;
-
-		int bufsize = (256*3+1)*totallines;
-		if(!(mal=mork=dest=(uint8 *)FCEU_dmalloc(bufsize)))
-			goto PNGerr;
-		//   mork=dest=XBuf;
-
-		for(y=0;y<totallines;y++)
-		{
-			*dest=0;			// No filter.
-			dest++;
-			for(x=256;x;x--)
-			{
-				u32 color = ModernDeemphColorMap(tmp,XBuf,1,1);
-				*dest++=(color>>0x10)&0xFF;
-				*dest++=(color>>0x08)&0xFF;
-				*dest++=(color>>0x00)&0xFF;
-				tmp++;
-			}
-		}
-
-		if(compress(compmem,&compmemsize,mork,bufsize)!=Z_OK)
-		{
-			if(mal) free(mal);
-			goto PNGerr;
-		}
-		if(mal) free(mal);
-		if(!WritePNGChunk(pp,compmemsize,"IDAT",compmem))
-			goto PNGerr;
-	}
-	if(!WritePNGChunk(pp,0,"IEND",0))
-		goto PNGerr;
-
-	free(compmem);
-	fclose(pp);
-
-	return u+1;
-
-
-PNGerr:
-	if(compmem)
-		free(compmem);
-	if(pp)
-		fclose(pp);
-	return(0);
+    // NOTE(ross): NESTEK doesn't need to do this.
+    return 0;
 }
 
 //overloaded SaveSnapshot for "Savesnapshot As" function
 int SaveSnapshot(char fileName[512])
 {
-	int totallines=FSettings.LastSLine-FSettings.FirstSLine+1;
-	int x,y;
-	FILE *pp=NULL;
-	uint8 *compmem=NULL;
-	uLongf compmemsize=totallines*263+12;
-
-	if(!(compmem=(uint8 *)FCEU_malloc(compmemsize)))
-		return 0;
-
-	if(!(pp=FCEUD_UTF8fopen(fileName,"wb")))
-	{
-		free(compmem);
-		return 0;
-	}
-
-	{
-		static uint8 header[8]={137,80,78,71,13,10,26,10};
-		if(fwrite(header,8,1,pp)!=1)
-			goto PNGerr;
-	}
-
-	{
-		uint8 chunko[13];
-
-		chunko[0]=chunko[1]=chunko[3]=0;
-		chunko[2]=0x1;			// Width of 256
-
-		chunko[4]=chunko[5]=chunko[6]=0;
-		chunko[7]=totallines;			// Height
-
-		chunko[8]=8;				// bit depth
-		chunko[9]=3;				// Color type; indexed 8-bit
-		chunko[10]=0;				// compression: deflate
-		chunko[11]=0;				// Basic adapative filter set(though none are used).
-		chunko[12]=0;				// No interlace.
-
-		if(!WritePNGChunk(pp,13,"IHDR",chunko))
-			goto PNGerr;
-	}
-
-	{
-		uint8 pdata[256*3];
-		for(x=0;x<256;x++)
-			FCEUD_GetPalette(x,pdata+x*3,pdata+x*3+1,pdata+x*3+2);
-		if(!WritePNGChunk(pp,256*3,"PLTE",pdata))
-			goto PNGerr;
-	}
-
-	{
-		uint8 *tmp=XBuf+FSettings.FirstSLine*256;
-		uint8 *dest,*mal,*mork;
-
-		if(!(mal=mork=dest=(uint8 *)FCEU_dmalloc((totallines<<8)+totallines)))
-			goto PNGerr;
-		//   mork=dest=XBuf;
-
-		for(y=0;y<totallines;y++)
-		{
-			*dest=0;			// No filter.
-			dest++;
-			for(x=256;x;x--,tmp++,dest++)
-				*dest=*tmp;
-		}
-
-		if(compress(compmem,&compmemsize,mork,(totallines<<8)+totallines)!=Z_OK)
-		{
-			if(mal) free(mal);
-			goto PNGerr;
-		}
-		if(mal) free(mal);
-		if(!WritePNGChunk(pp,compmemsize,"IDAT",compmem))
-			goto PNGerr;
-	}
-	if(!WritePNGChunk(pp,0,"IEND",0))
-		goto PNGerr;
-
-	free(compmem);
-	fclose(pp);
-
-	return 0;
-
-
-PNGerr:
-	if(compmem)
-		free(compmem);
-	if(pp)
-		fclose(pp);
-	return(0);
+    // NOTE(ross): NESTEK doesn't need to do this.
+    return 0;
 }
+
 // called when another ROM is opened
 void ResetScreenshotsCounter()
 {

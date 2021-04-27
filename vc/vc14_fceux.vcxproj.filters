@@ -19,9 +19,6 @@
     <Filter Include="drivers\win\res">
       <UniqueIdentifier>{008e1f62-e23f-4235-bee7-a45a466678e9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="drivers\win\zlib">
-      <UniqueIdentifier>{7279627e-c72f-441f-bb8b-48ef8412f051}</UniqueIdentifier>
-    </Filter>
     <Filter Include="fir">
       <UniqueIdentifier>{8770e1b4-9ef8-4253-bdcd-7c4d5a51461b}</UniqueIdentifier>
     </Filter>
@@ -397,48 +394,6 @@
     <ClCompile Include="..\src\drivers\win\window.cpp">
       <Filter>drivers\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\adler32.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\compress.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\crc32.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\deflate.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\gzio.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\infblock.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\infcodes.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\inffast.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\inflate.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\inftrees.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\infutil.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\trees.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\uncompr.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\drivers\win\zlib\zutil.c">
-      <Filter>drivers\win\zlib</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\fceu.cpp" />
     <ClCompile Include="..\src\fds.cpp" />
     <ClCompile Include="..\src\file.cpp" />
@@ -524,9 +479,6 @@
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="..\src\utils\memory.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\utils\unzip.cpp">
       <Filter>utils</Filter>
     </ClCompile>
     <ClCompile Include="..\src\utils\xstring.cpp">
@@ -825,9 +777,6 @@
     <ClCompile Include="..\src\boards\vrc6.cpp">
       <Filter>boards</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\utils\ioapi.cpp">
-      <Filter>utils</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\boards\mihunche.cpp">
       <Filter>boards</Filter>
     </ClCompile>
@@ -1081,9 +1030,6 @@
     <ClInclude Include="..\src\utils\memory.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\utils\unzip.h">
-      <Filter>utils</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\utils\valuearray.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -1212,9 +1158,6 @@
     </ClInclude>
     <ClInclude Include="..\src\x6502abbrev.h">
       <Filter>include files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\utils\ioapi.h">
-      <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="..\src\input\fkb.h">
       <Filter>input</Filter>

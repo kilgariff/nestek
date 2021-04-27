@@ -37,8 +37,6 @@
 #include <sys/stat.h>
 //#include <unistd.h> //mbg merge 7/17/06 removed
 
-#include <zlib.h>
-
 int FCEUnetplay=0;
 
 static uint8 netjoy[4]; // Controller cache.
@@ -111,88 +109,14 @@ void FCEUI_NetplayText(uint8 *text)
 
 int FCEUNET_SendFile(uint8 cmd, char *fn)
 {
-	uint32 len;
-	uLongf clen;
-	char *buf, *cbuf;
-	FILE *fp;
-	struct stat sb;
-
-	if(!(fp=FCEUD_UTF8fopen(fn,"rb"))) return(0);
-
-	FCEUX_fstat(fileno(fp),&sb);
-	len = sb.st_size;
-	buf = (char*)FCEU_dmalloc(len); //mbg merge 7/17/06 added cast
-	fread(buf, 1, len, fp);
-	fclose(fp);
-
-	cbuf = (char*)FCEU_dmalloc(4 + len + len / 1000 + 12); //mbg merge 7/17/06 added cast
-	FCEU_en32lsb((uint8*)cbuf, len); //mbg merge 7/17/06 added cast
-	compress2((uint8*)cbuf + 4, &clen, (uint8*)buf, len, 7); //mbg merge 7/17/06 added casts
-	free(buf);
-
-	//printf("Sending file: %s, %d, %d\n",fn,len,clen);
-
-	len = clen + 4;
-
-	if(!FCEUNET_SendCommand(cmd,len))
-	{
-		free(cbuf);
-		return(0);
-	}
-	if(!FCEUD_SendData(cbuf, len))
-	{
-		NetError();
-		free(cbuf);
-		return(0);
-	}
-	free(cbuf);
-
-	return(1);
+    // NOTE(ross): NESTEK doesn't need this.
+    return 0;
 }
 
 static FILE *FetchFile(uint32 remlen)
 {
-	uint32 clen = remlen;
-	char *cbuf;
-	uLongf len;
-	char *buf;
-	FILE *fp;
-
-	if(clen > 500000)  // Sanity check
-	{
-		NetError();
-		return(0);
-	}
-
-	//printf("Receiving file: %d...\n",clen);
-	if((fp = tmpfile()))
-	{
-		cbuf = (char *)FCEU_dmalloc(clen); //mbg merge 7/17/06 added cast
-		if(!FCEUD_RecvData(cbuf, clen))
-		{
-			NetError();
-			fclose(fp);
-			free(cbuf);
-			return(0);
-		}
-
-		len = FCEU_de32lsb((uint8*)cbuf); //mbg merge 7/17/06 added cast
-		if(len > 500000)    // Another sanity check
-		{
-			NetError();
-			fclose(fp);
-			free(cbuf);
-			return(0);
-		}
-		buf = (char *)FCEU_dmalloc(len); //mbg merge 7/17/06 added cast
-		uncompress((uint8*)buf, &len, (uint8*)cbuf + 4, clen - 4); //mbg merge 7/17/06 added casts
-
-		fwrite(buf, 1, len, fp);
-		free(buf);
-		fseek(fp, 0, SEEK_SET);
-		return(fp);
-	}
-	return(0);
+    // NOTE(ross): NESTEK doesn't need this.
+    return 0;
 }
 
 void NetplayUpdate(uint8 *joyp)

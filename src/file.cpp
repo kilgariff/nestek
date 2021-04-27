@@ -32,15 +32,7 @@
 #include "utils/endian.h"
 #include "utils/memory.h"
 #include "utils/md5.h"
-#ifdef _SYSTEM_MINIZIP
-#ifdef __linux
-#include <minizip/unzip.h>
-#else // Apple Most Likely
-#include <unzip.h>
-#endif
-#else
-#include "utils/unzip.h"
-#endif
+
 #include "driver.h"
 #include "types.h"
 #include "fceu.h"
@@ -194,76 +186,6 @@ FileBaseInfo DetermineFileBase(const char *f) {
 
 inline FileBaseInfo DetermineFileBase(const std::string& str) { return DetermineFileBase(str.c_str()); }
 
-static FCEUFILE * TryUnzip(const std::string& path) {
-	unzFile tz;
-	if((tz=unzOpen(path.c_str())))  // If it's not a zip file, use regular file handlers.
-		// Assuming file type by extension usually works,
-		// but I don't like it. :)
-	{
-		if(unzGoToFirstFile(tz)==UNZ_OK)
-		{
-			for(;;)
-			{
-				char tempu[512];	// Longer filenames might be possible, but I don't
-				// think people would name files that long in zip files...
-				unzGetCurrentFileInfo(tz,0,tempu,512,0,0,0,0);
-				tempu[511]=0;
-				if(strlen(tempu)>=4)
-				{
-					char *za=tempu+strlen(tempu)-4;
-
-					//if(!ext)
-					{
-						if(!strcasecmp(za,".nes") || !strcasecmp(za,".fds") ||
-							!strcasecmp(za,".nsf") || !strcasecmp(za,".unf") ||
-							!strcasecmp(za,".nez"))
-							break;
-					}
-					//else if(!strcasecmp(za,ext))
-					//	break;
-				}
-				if(strlen(tempu)>=5)
-				{
-					if(!strcasecmp(tempu+strlen(tempu)-5,".unif"))
-						break;
-				}
-				if(unzGoToNextFile(tz)!=UNZ_OK)
-				{
-					if(unzGoToFirstFile(tz)!=UNZ_OK) goto zpfail;
-					unzCloseCurrentFile(tz);
-					unzClose(tz);
-					return 0;
-				}
-			}
-			if(unzOpenCurrentFile(tz)!=UNZ_OK)
-				goto zpfail;
-		}
-		else
-		{
-zpfail:
-			unzClose(tz);
-			return 0;
-		}
-
-		unz_file_info ufo;
-		unzGetCurrentFileInfo(tz,&ufo,0,0,0,0,0,0);
-
-		int size = ufo.uncompressed_size;
-		EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(size);
-		unzReadCurrentFile(tz,ms->buf(),ufo.uncompressed_size);
-		unzCloseCurrentFile(tz);
-		unzClose(tz);
-
-		FCEUFILE *fceufp = new FCEUFILE();
-		fceufp->stream = ms;
-		fceufp->size = size;
-		return fceufp;
-
-	}
-
-	return 0;
-}
-
 FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, char *ext, int index, const char** extensions, int* userCancel)
 {
 	FILE *ipsfile=0;
@@ -277,116 +199,34 @@ FCEUFILE * FCEU_fopen(const char *path, const char *ipsfn, const char *mode, cha
 		return 0;
 	}
 
-	std::string archive,fname,fileToOpen;
-	FCEU_SplitArchiveFilename(path,archive,fname,fileToOpen);
+	std::string fname, fileToOpen, archive;
+	FCEU_SplitArchiveFilename(path, archive, fname, fileToOpen);
 
-
-	//try to setup the ips file
-	if(ipsfn && read)
-		ipsfile=FCEUD_UTF8fopen(ipsfn,"rb");
-	if(read)
+	if (read)
 	{
-		ArchiveScanRecord asr = FCEUD_ScanArchive(fileToOpen);
-		asr.files.FilterByExtension(extensions);
-		if(!asr.isArchive())
+		EMUFILE_FILE* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
+		if(!fp)
+			return 0;
+
+		if (fp->get_fp() == NULL)
 		{
-			//if the archive contained no files, try to open it the old fashioned way
-			EMUFILE_FILE* fp = FCEUD_UTF8_fstream(fileToOpen,mode);
-			if(!fp)
-				return 0;
-			if (fp->get_fp() == NULL)
-			{
-				//fp is new'ed so it has to be deleted
-				delete fp;
-				return 0;
-			}
-
-
-			//try to read a zip file
-			{
-				fceufp = TryUnzip(fileToOpen);
-				if(fceufp) {
-					delete fp;
-					fceufp->filename = fileToOpen;
-					fceufp->logicalPath = fileToOpen;
-					fceufp->fullFilename = fileToOpen;
-					fceufp->archiveIndex = -1;
-					goto applyips;
-				}
-			}
-
-			//try to read a gzipped file
-			{
-				uint32 magic;
-
-				magic = fp->fgetc();
-				magic|=fp->fgetc()<<8;
-				magic|=fp->fgetc()<<16;
-				fp->fseek(0,SEEK_SET);
-
-				if(magic==0x088b1f) {
-					 // maybe gzip...
-
-					gzFile gzfile = gzopen(fileToOpen.c_str(),"rb");
-					if(gzfile) {
-						delete fp;
-
-						int size;
-						for(size=0; gzgetc(gzfile) != EOF; size++) {}
-						EMUFILE_MEMORY* ms = new EMUFILE_MEMORY(size);
-						gzseek(gzfile,0,SEEK_SET);
-						gzread(gzfile,ms->buf(),size);
-						gzclose(gzfile);
-
-						fceufp = new FCEUFILE();
-						fceufp->filename = fileToOpen;
-						fceufp->logicalPath = fileToOpen;
-						fceufp->fullFilename = fileToOpen;
-						fceufp->archiveIndex = -1;
-						fceufp->stream = ms;
-						fceufp->size = size;
-						goto applyips;
-					}
-				}
-			}
-
-
-			//open a plain old file
-			fceufp = new FCEUFILE();
-			fceufp->filename = fileToOpen;
-			fceufp->logicalPath = fileToOpen;
-			fceufp->fullFilename = fileToOpen;
-			fceufp->archiveIndex = -1;
-			fceufp->stream = fp;
-			FCEU_fseek(fceufp,0,SEEK_END);
-			fceufp->size = FCEU_ftell(fceufp);
-			FCEU_fseek(fceufp,0,SEEK_SET);
-			goto applyips;
-		}
-		else
-		{
-			//open an archive file
-			if(archive == "")
-				if(index != -1)
-					fceufp = FCEUD_OpenArchiveIndex(asr, fileToOpen, index, userCancel);
-				else
-					fceufp = FCEUD_OpenArchive(asr, fileToOpen, 0, userCancel);
-			else
-				fceufp = FCEUD_OpenArchive(asr, archive, &fname, userCancel);
-
-			if(!fceufp) return 0;
-
-			FileBaseInfo fbi = DetermineFileBase(fileToOpen);
-			fceufp->logicalPath = fbi.filebasedirectory + fceufp->filename;
-			goto applyips;
+			//fp is new'ed so it has to be deleted
+			delete fp;
+			return 0;
 		}
 
-	applyips:
-		//try to open the ips file
-		if(!ipsfile && !ipsfn)
-			ipsfile=FCEUD_UTF8fopen(FCEU_MakeIpsFilename(DetermineFileBase(fceufp->logicalPath.c_str())),"rb");
-		ApplyIPS(ipsfile,fceufp);
-		return fceufp;
+		//open a plain old file
+		fceufp = new FCEUFILE();
+		fceufp->filename = fileToOpen;
+		fceufp->logicalPath = fileToOpen;
+		fceufp->fullFilename = fileToOpen;
+		fceufp->archiveIndex = -1;
+		fceufp->stream = fp;
+		FCEU_fseek(fceufp,0,SEEK_END);
+		fceufp->size = FCEU_ftell(fceufp);
+		FCEU_fseek(fceufp,0,SEEK_SET);
+
+        return fceufp;
 	}
 	return 0;
 }
@@ -700,13 +540,13 @@ std::string FCEU_MakeFName(int type, int id1, const char *cd1)
 			if(odirs[FCEUIOD_NV])
 				sprintf(ret,"%s" PSS "%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
 			else
-				sprintf(ret,"%s" PSS "sav" PSS "%s.%s",BaseDirectory.c_str(),FileBase,cd1);
+				sprintf(ret,"sav" PSS "%s.%s",FileBase,cd1);
 			if(stat(ret,&tmpstat)==-1)
 			{
 				if(odirs[FCEUIOD_NV])
 					sprintf(ret,"%s" PSS "%s.%s",odirs[FCEUIOD_NV],FileBase,cd1);
 				else
-					sprintf(ret,"%s" PSS "sav" PSS "%s.%s",BaseDirectory.c_str(),FileBase,cd1);
+					sprintf(ret,"sav" PSS "%s.%s",FileBase,cd1);
 			}
 			break;
 		case FCEUMKF_AUTOSTATE:

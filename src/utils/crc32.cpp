@@ -21,13 +21,15 @@
 #include "../types.h"
 #include "crc32.h"
 
-#include <zlib.h>
-uint32 CalcCRC32(uint32 crc, uint8 *buf, uint32 len)
-{
- return(crc32(crc,buf,len));
-}
+// TODO(ross): Stripped out CRC32 calculation.
 
-uint32 FCEUI_CRC32(uint32 crc, uint8 *buf, uint32 len)
-{
- return(CalcCRC32(crc,buf,len));
-}
+//#include <zlib.h>
+//uint32 CalcCRC32(uint32 crc, uint8 *buf, uint32 len)
+//{
+// return(crc32(crc,buf,len));
+//}
+//
+//uint32 FCEUI_CRC32(uint32 crc, uint8 *buf, uint32 len)
+//{
+// return(CalcCRC32(crc,buf,len));
+//}

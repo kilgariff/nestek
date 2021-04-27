@@ -703,8 +703,6 @@ int main(int argc,char *argv[])
         active_config = &user_config;
     }
 
-	initArchiveSystem();
-
 	if(timeBeginPeriod(1) != TIMERR_NOERROR)
 	{
 		AddLogText("Error setting timer granularity to 1ms.", DO_ADD_NEWLINE);
@@ -728,6 +726,8 @@ int main(int argc,char *argv[])
 
 	// Get the base directory
 	GetBaseDirectory();
+
+    SetCurrentDirectory(BaseDirectory.c_str());
 
 	std::string const rom_file_path = get_path_to_exe() + "\\game.nes";
 

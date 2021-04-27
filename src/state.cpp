@@ -36,7 +36,6 @@
 #include "netplay.h"
 #include "video.h"
 #include "input.h"
-#include "zlib.h"
 #include "driver.h"
 
 //TODO - we really need some kind of global platform-specific options api
@@ -360,89 +359,8 @@ extern int geniestage;
 
 bool FCEUSS_SaveMS(EMUFILE* outstream, int compressionLevel)
 {
-	// reinit memory_savestate
-	// memory_savestate is global variable which already has its vector of bytes, so no need to allocate memory every time we use save/loadstate
-	memory_savestate.set_len(0);	// this also seeks to the beginning
-	memory_savestate.unfail();
-
-	EMUFILE* os = &memory_savestate;
-
-	uint32 totalsize = 0;
-
-	FCEUPPU_SaveState();
-	FCEUSND_SaveState();
-	totalsize=WriteStateChunk(os,1,SFCPU);
-	totalsize+=WriteStateChunk(os,2,SFCPUC);
-	totalsize+=WriteStateChunk(os,3,FCEUPPU_STATEINFO);
-	totalsize+=WriteStateChunk(os,31,FCEU_NEWPPU_STATEINFO);
-	totalsize+=WriteStateChunk(os,4,FCEUCTRL_STATEINFO);
-	totalsize+=WriteStateChunk(os,5,FCEUSND_STATEINFO);
-	if(FCEUMOV_Mode(MOVIEMODE_PLAY|MOVIEMODE_RECORD|MOVIEMODE_FINISHED))
-	{
-		totalsize+=WriteStateChunk(os,6,FCEUMOV_STATEINFO);
-
-		//MBG TAS Editor HACK HACK HACK!
-		//do not save the movie state if we are in Taseditor! That would be a huge waste of time and space!
-		if(!FCEUMOV_Mode(MOVIEMODE_TASEDITOR))
-		{
-			os->fseek(5,SEEK_CUR);
-			int size = FCEUMOV_WriteState(os);
-			os->fseek(-(size+5),SEEK_CUR);
-			os->fputc(7);
-			write32le(size, os);
-			os->fseek(size,SEEK_CUR);
-
-			totalsize += 5 + size;
-		}
-	}
-	// save back buffer
-	{
-		extern uint8 *XBackBuf;
-		uint32 size = 256 * 256 + 8;
-		os->fputc(8);
-		write32le(size, os);
-		os->fwrite((char*)XBackBuf,size);
-		totalsize += 5 + size;
-	}
-
-	if(SPreSave) SPreSave();
-	totalsize+=WriteStateChunk(os,0x10,SFMDATA);
-	if(SPreSave) SPostSave();
-
-	//save the length of the file
-	int len = memory_savestate.size();
-
-	//sanity check: len and totalsize should be the same
-	if(len != totalsize)
-	{
-		FCEUD_PrintError("sanity violation: len != totalsize");
-		return false;
-	}
-
-	int error = Z_OK;
-	uint8* cbuf = (uint8*)memory_savestate.buf();
-	uLongf comprlen = -1;
-	if(compressionLevel != Z_NO_COMPRESSION && (compressSavestates || FCEUMOV_Mode(MOVIEMODE_TASEDITOR)))
-	{
-		// worst case compression: zlib says "0.1% larger than sourceLen plus 12 bytes"
-		comprlen = (len>>9)+12 + len;
-		if (compressed_buf.size() < comprlen) compressed_buf.resize(comprlen);
-		cbuf = &compressed_buf[0];
-		// do compression
-		error = compress2(cbuf, &comprlen, (uint8*)memory_savestate.buf(), len, compressionLevel);
-	}
-
-	//dump the header
-	uint8 header[16]="FCSX";
-	FCEU_en32lsb(header+4, totalsize);
-	FCEU_en32lsb(header+8, FCEU_VERSION_NUMERIC);
-	FCEU_en32lsb(header+12, comprlen);
-
-	//dump it to the destination file
-	outstream->fwrite((char*)header,16);
-	outstream->fwrite((char*)cbuf,comprlen==-1?totalsize:comprlen);
-
-	return error == Z_OK;
+    // NOTE(ross): NESTEK doesn't need to do this.
+    return 0;
 }
 
 
@@ -605,10 +523,6 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 	//maybe make a backup savestate
 	bool backup = (params == SSLOADPARAM_BACKUP);
 	EMUFILE_MEMORY msBackupSavestate;
-	if(backup)
-	{
-		FCEUSS_SaveMS(&msBackupSavestate,Z_NO_COMPRESSION);
-	}
 
 	uint8 header[16];
 	//read and analyze the header
@@ -635,21 +549,8 @@ bool FCEUSS_LoadFP(EMUFILE* is, ENUM_SSLOADPARAMS params)
 	memory_savestate.unfail();
 	memory_savestate.fseek(0, SEEK_SET);
 
-	if(comprlen != -1)
-	{
-		// the savestate is compressed: read from is to compressed_buf, then decompress from compressed_buf to memory_savestate.vec
-		if ((int)compressed_buf.size() < comprlen) compressed_buf.resize(comprlen);
-		is->fread(&compressed_buf[0], comprlen);
-
-		uLongf uncomprlen = totalsize;
-		int error = uncompress(memory_savestate.buf(), &uncomprlen, &compressed_buf[0], comprlen);
-		if(error != Z_OK || uncomprlen != totalsize)
-			return false;	// we dont need to restore the backup here because we havent messed with the emulator state yet
-	} else
-	{
-		// the savestate is not compressed: just read from is to memory_savestate.vec
-		is->fread(memory_savestate.buf(), totalsize);
-	}
+	// read from is to memory_savestate.vec
+	is->fread(memory_savestate.buf(), totalsize);
 
 	FCEUMOV_PreLoad();
 

@@ -41,7 +41,6 @@ extern int RAMInitSeed;
 #include <fstream>
 #include <climits>
 #include <cstdarg>
-#include <zlib.h>
 
 using namespace std;
 
@@ -1109,56 +1108,8 @@ bool FCEUI_LoadMovie(const char *fname, bool _read_only, int _pauseframe)
 //TODO - BUG - the record-from-another-savestate doesnt work.
 void FCEUI_SaveMovie(const char *fname, EMOVIE_FLAG flags, std::wstring author)
 {
-	if(!FCEU_IsValidUI(FCEUI_RECORDMOVIE))
-		return;
-
-	assert(fname);
-
-	FCEUI_StopMovie();
-
-	if (NULL == openRecordingMovie(fname))
-		return;
-
-#ifdef WIN32
-	//Add to the recent movie menu
-	AddRecentMovieFile(fname);
-#endif
-
-	currFrameCounter = 0;
-	LagCounterReset();
-	FCEUMOV_CreateCleanMovie();
-	if(author != L"") currMovieData.comments.push_back(L"author " + author);
-
-	if(flags & MOVIE_FLAG_FROM_POWERON)
-	{
-		movieFromPoweron = true;
-		poweron(true);
-	}
-	else if(flags & MOVIE_FLAG_FROM_SAVERAM)
-	{
-		movieFromPoweron = true;
-		MovieData::dumpSaveramTo(&currMovieData.saveram,Z_NO_COMPRESSION); //i guess with this there's a chance someone could hack the file, at least, so maybe it's helpfu
-		bogorf = true;
-		poweron(false);
-		bogorf = false;
-	}
-	else //from savestate
-	{
-		movieFromPoweron = false;
-		MovieData::dumpSavestateTo(&currMovieData.savestate,Z_BEST_COMPRESSION);
-	}
-
-	FCEUMOV_ClearCommands();
-
-	//we are going to go ahead and dump the header. from now on we will only be appending frames
-	currMovieData.dump(osRecordingMovie, false);
-
-	movieMode = MOVIEMODE_RECORD;
-	movie_readonly = false;
-	if (movieMode != MOVIEMODE_TASEDITOR)
-		currRerecordCount = 0;
-
-	FCEU_DispMessage("Movie recording started.",0);
+    // NOTE(ross): NESTEK doesn't need this.
+    return;
 }
 
 
