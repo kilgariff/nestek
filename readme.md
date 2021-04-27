@@ -2,7 +2,7 @@
 
 https://lowtekgames.itch.io/nestek
 
-Originally developed for [Lowtek Games](http://lowtek.co.uk)' FLEA!, NESTEK aims to make it quick and easy to distribute your homebrew NES games on platforms such as Steam.
+Originally developed for [Lowtek Games](http://lowtek.co.uk)' FLEA!, NESTEK makes it quick and easy to distribute your homebrew NES games on platforms such as Steam.
 
 Forked from FCEUX (a very mature and accurate emulator), NESTEK loads a single ROM (game.nes) from the same directory as the NESTEK executable. It can also load a custom icon file (icon.ico) and a 256x224 splash image (splash.png).
 
