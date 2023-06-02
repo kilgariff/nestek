@@ -38,6 +38,10 @@ public:
     bool show_splash_screen = true;
     uint64_t splash_screen_timeout_ms = 2000;
 
+    bool use_hq2x = false;
+    bool disable_spritelimit = false;
+    bool stretch_to_screen = false;
+
     std::vector<ButtonMapping> button_mappings;
 
     // Loading and saving.

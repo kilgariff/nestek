@@ -41,6 +41,9 @@ extern StandaloneConfig * active_config;
 
 void SaveGamepadConfig();
 void ToggleFullscreenConfig();
+void ToggleSmoothing();
+void ToggleStretchToFit();
+void ToggleFlickerReduction();
 void LoadDefaultGamepadConfig(size_t player_idx);
 
 extern int maxconbskip;

@@ -16,13 +16,16 @@ constexpr size_t config_option_count =
 static char const * config_option_str_array[config_option_count] = {
     "Back to game",
     "Toggle Fullscreen",
+    "Toggle Stretch to Fit",
+    "Toggle Smoothing",
+    "Toggle Flicker Reduction",
     "Remap buttons (player 1)",
     "Remap buttons (player 2)",
     "Delete save game",
     "Exit game"
 };
 
-static char const * config_option_to_string(ConfigOption const option)
+static char const * config_option_to_string(ConfigOption const option) noexcept
 {
     return config_option_str_array[static_cast<size_t>(option)];
 }
@@ -156,6 +159,24 @@ void ConfigMenu::ConfirmOption()
             case ConfigOption::ToggleFullscreen:
             {
                 ToggleFullscreenConfig();
+                break;
+            }
+
+            case ConfigOption::ToggleStretchToFit:
+            {
+                ToggleStretchToFit();
+                break;
+            }
+
+            case ConfigOption::ToggleSmoothing:
+            {
+                ToggleSmoothing();
+                break;
+            }
+
+            case ConfigOption::ToggleFlickerReduction:
+            {
+                ToggleFlickerReduction();
                 break;
             }
 

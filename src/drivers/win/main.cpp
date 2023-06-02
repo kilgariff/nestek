@@ -259,6 +259,56 @@ void ToggleFullscreenConfig()
     SetVideoMode(active_config->start_fullscreen);
 }
 
+void ToggleSmoothing()
+{
+    active_config->use_hq2x = !active_config->use_hq2x;
+
+	winspecial = active_config->use_hq2x; // Windowed
+	vmodes[0].special = active_config->use_hq2x; // Fullscreen
+
+    SaveUserConfig(default_config, user_config);
+    SetVideoMode(active_config->start_fullscreen);
+}
+
+void ToggleStretchToFit()
+{
+	active_config->stretch_to_screen = !active_config->stretch_to_screen;
+
+	if (active_config->stretch_to_screen)
+	{
+		eoptions &= ~EO_FORCEISCALE;
+		eoptions &= ~EO_SQUAREPIXELS;
+		eoptions &= ~EO_BESTFIT;
+	}
+	else
+	{
+		eoptions |= EO_FORCEISCALE;
+		eoptions |= EO_SQUAREPIXELS;
+		eoptions |= EO_BESTFIT;
+	}
+
+	SaveUserConfig(default_config, user_config);
+    SetVideoMode(active_config->start_fullscreen);
+}
+
+void ToggleFlickerReduction()
+{
+    active_config->disable_spritelimit = !active_config->disable_spritelimit;
+
+	if (active_config->disable_spritelimit)
+	{
+		eoptions |= EO_NOSPRLIM;
+	}
+	else
+	{
+		eoptions &= ~EO_NOSPRLIM;
+	}
+
+    SaveUserConfig(default_config, user_config);
+    SetVideoMode(active_config->start_fullscreen);
+	DoVideoConfigFix();
+}
+
 void SetupGamepadConfig()
 {
     for (size_t player_idx = 0; player_idx < active_config->button_mappings.size(); ++player_idx)
@@ -709,6 +759,30 @@ int main(int argc,char *argv[])
 	}
 
 	InitCommonControls();
+
+	// NOTE(ross): Set video state for standalone config.
+	{
+		if (active_config->use_hq2x)
+		{
+			// Set up the special filtering mode for hq2x:
+			winspecial = 1; // Windowed
+			vmodes[0].special = 1; // Fullscreen
+		}
+
+		if (active_config->stretch_to_screen)
+		{
+			// Integer scaling (stretch):
+			eoptions &= ~EO_FORCEISCALE;
+			eoptions &= ~EO_SQUAREPIXELS;
+			eoptions &= ~EO_BESTFIT;
+		}
+
+		if (active_config->disable_spritelimit)
+		{
+			// Disable the sprite limit:
+			eoptions |= EO_NOSPRLIM;
+		}
+	}
 
     if (active_config->show_splash_screen)
     {

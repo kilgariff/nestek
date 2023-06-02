@@ -437,7 +437,7 @@ void FCEU_ResetMessages()
 
 static int WritePNGChunk(FILE *fp, uint32 size, const char *type, uint8 *data)
 {
-    // NOTE(ross): No need to write PNGs in NESTER.
+    // NOTE(ross): No need to write PNGs in NESTEK.
 	/*uint32 crc;
 
 	uint8 tempo[4];

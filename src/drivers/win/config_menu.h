@@ -6,6 +6,9 @@ enum class ConfigOption : uint8_t
 {
     BackToGame,
     ToggleFullscreen,
+    ToggleStretchToFit,
+    ToggleSmoothing,
+    ToggleFlickerReduction,
     RemapButtonsP1,
     RemapButtonsP2,
     DeleteSave,

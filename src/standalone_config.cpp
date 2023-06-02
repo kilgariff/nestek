@@ -44,6 +44,15 @@ static std::string get_user_config_path(std::string const game_name)
     return path;
 }
 
+static void read_json_bool_if_present(bool * value, Document & d, char const * key)
+{
+    Document::MemberIterator it = d.FindMember(key);
+    if (it != d.MemberEnd())
+    {
+        *value = it->value.GetBool();
+    }
+}
+
 //==================================================================================================
 void StandaloneConfig::LoadFromFile(std::string const file_path)
 {
@@ -64,6 +73,10 @@ void StandaloneConfig::LoadFromFile(std::string const file_path)
         start_fullscreen = d["start_fullscreen"].GetBool();
         show_splash_screen = d["show_splash_screen"].GetBool();
         splash_screen_timeout_ms = d["splash_screen_timeout_ms"].GetUint64();
+
+        read_json_bool_if_present(&use_hq2x, d, "use_hq2x");
+        read_json_bool_if_present(&disable_spritelimit, d, "disable_spritelimit");
+        read_json_bool_if_present(&stretch_to_screen, d, "stretch_to_screen");
 
         if (d.HasMember("button_mappings"))
         {
@@ -129,6 +142,10 @@ void StandaloneConfig::SaveToFile(std::string const file_path)
         d.AddMember("start_fullscreen", start_fullscreen, d.GetAllocator());
         d.AddMember("show_splash_screen", show_splash_screen, d.GetAllocator());
         d.AddMember("splash_screen_timeout_ms", splash_screen_timeout_ms, d.GetAllocator());
+
+        d.AddMember("use_hq2x", use_hq2x, d.GetAllocator());
+        d.AddMember("disable_spritelimit", disable_spritelimit, d.GetAllocator());
+        d.AddMember("stretch_to_screen", stretch_to_screen, d.GetAllocator());
 
         // Gamepad config.
         std::array<std::string, NESButton::COUNT> const enum_to_key = {
