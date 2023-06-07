@@ -1,6 +1,9 @@
 {
-    "game_name": "Ross Test",
-    "enable_separate_user_config": false,
+    "game_name": "My Game Name",
+    "enable_separate_user_config": true,
     "show_splash_screen": true,
-    "splash_screen_timeout_ms": 3000
+    "splash_screen_timeout_ms": 1000,
+    "use_hq2x": false,
+    "disable_spritelimit": false,
+    "stretch_to_screen": false
 }
