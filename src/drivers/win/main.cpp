@@ -128,7 +128,7 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count);
 // Internal variables
 int frameSkipAmt = 18;
 uint8 *xbsave = NULL;
-int eoptions = EO_BGRUN | EO_FORCEISCALE | EO_BESTFIT | EO_BGCOLOR | EO_SQUAREPIXELS;
+int eoptions = EO_BGRUN | EO_FORCEISCALE | EO_BESTFIT | EO_SQUAREPIXELS;
 
 //global variables
 int soundoptions = SO_SECONDARY | SO_GFOCUS;
@@ -1048,8 +1048,10 @@ void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
         splash_screen.Unload();
 
         //blit the framebuffer
-        if (XBuf)
-            FCEUD_BlitScreen(XBuf);
+		if (XBuf && (currFrameCounter > 30 || FCEUI_EmulationPaused()))
+		{
+			FCEUD_BlitScreen(XBuf);
+		}
     }
 
     //update debugging displays

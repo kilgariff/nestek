@@ -1759,7 +1759,7 @@ int FCEUPPU_Loop(int skip) {
 
 	//Needed for Knight Rider, possibly others.
 	if (ppudead) {
-		memset(XBuf, 0x80, 256 * 240);
+		memset(XBuf, 0x00, 256 * 240);
 		X6502_Run(scanlines_per_frame * (256 + 85));
 		ppudead--;
 	} else {

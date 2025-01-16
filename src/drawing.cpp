@@ -159,7 +159,7 @@ void DrawMessage(bool beforeMovie)
 		if(guiMessage.howlong <= 24) color = 0x21;
 		if(guiMessage.howlong <= 16) color = 0x51;
 		if(guiMessage.howlong <=  8) color = 0x41;
-		DrawTextTrans(XBackBuf, 256, (uint8 *)guiMessage.errmsg, 0xC0, color+0x80);
+		DrawTextTrans(XBackBuf, 256, (uint8 *)guiMessage.errmsg, 0x00, color+0x80);
 	}
 }
 
