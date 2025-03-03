@@ -172,9 +172,6 @@ string gettingstartedhelp = "Gettingstarted";//Getting Started
 void CloseConfigMenu()
 {
 	config_menu.Hide();
-
-	// Stop timer that's listening for gamepad input.
-	KillTimer(GetMainHWND(), 1);
 }
 
 void UpdateConfigMenu()
@@ -1373,73 +1370,106 @@ adelikat: Outsourced this to a remappable hotkey
 
 	case WM_TIMER:
 	{
-		uint8 devicenum;
-		uint16 buttonnum;
-		GUID guid;
-
-		static bool just_pressed = true;
-
-		if (DoJoyWaitTest(&guid, &devicenum, &buttonnum))
+		if (splash_screen.IsShowing() == false)
 		{
-			if (just_pressed)
+			// NOTE(ross): This is a hack to pause the game if a controller is disconnected.
+			if (config_menu.IsShowing() == false)
 			{
-                if (config_menu.IsShowing())
-                {
-				    if (config_menu.IsAwaitingKey())
-				    {
-					    if (config_menu.GetState() == ConfigMenuState::RemapPlayer1 ||
-						    config_menu.GetState() == ConfigMenuState::RemapPlayer2)
-					    {
-						    size_t const player_idx =
-							    config_menu.GetState() == ConfigMenuState::RemapPlayer1 ? 0 : 1;
+				static int prev_num_connected_js = 0;
+				int const connected_js = CountConnectedJoysticks();
+				if (connected_js < prev_num_connected_js)
+				{
+					config_menu.Show();
+				}
+				prev_num_connected_js = connected_js;
+			}
 
-						    ButtConfig * bc = &GetGamePadConfig(player_idx)[size_t(config_menu.GetCurrentRemapOption())];
+			uint8 devicenum;
+			uint16 buttonnum;
+			GUID guid;
 
-						    bc->NumC = 2;
-						    bc->ButtType[1] = BUTTC_JOYSTICK;
-						    bc->DeviceNum[1] = devicenum;
-						    bc->ButtonNum[1] = buttonnum;
-						    bc->DeviceInstance[1] = guid;
+			static bool just_pressed = true;
 
-						    config_menu.StopAwaitingKey();
+			if (DoJoyWaitTest(&guid, &devicenum, &buttonnum))
+			{
+				if (just_pressed)
+				{
+					if (config_menu.IsShowing())
+					{
+						if (config_menu.IsAwaitingKey())
+						{
+							if (config_menu.GetState() == ConfigMenuState::RemapPlayer1 ||
+								config_menu.GetState() == ConfigMenuState::RemapPlayer2)
+							{
+								// Bumper buttons aren't mappable as they bring up the menu.
+								if (buttonnum != 4 && buttonnum != 5)
+								{
+									size_t const player_idx =
+										config_menu.GetState() == ConfigMenuState::RemapPlayer1 ? 0 : 1;
 
-                            SaveGamepadConfig();
-					    }
-				    }
-				    else
-				    {
-					    // Joystick up or direction up.
-					    if (buttonnum == 49153 || buttonnum == 8192)
-					    {
-						    config_menu.PreviousOption();
-					    }
+									ButtConfig * bc = &GetGamePadConfig(player_idx)[size_t(config_menu.GetCurrentRemapOption())];
 
-					    // Joystick down or direction down.
-					    else if (buttonnum == 32769 || buttonnum == 8194)
-					    {
-						    config_menu.NextOption();
-					    }
+									bc->NumC = 2;
+									bc->ButtType[1] = BUTTC_JOYSTICK;
+									bc->DeviceNum[1] = devicenum;
+									bc->ButtonNum[1] = buttonnum;
+									bc->DeviceInstance[1] = guid;
 
-					    // Button A.
-					    else if (buttonnum == 0)
-					    {
-						    config_menu.ConfirmOption();
-					    }
+									config_menu.StopAwaitingKey();
 
-					    // Button B.
-					    else if (buttonnum == 1)
-					    {
-						    config_menu.Hide();
-					    }
-				    }
-			    }
-            }
+									SaveGamepadConfig();
+								}
+							}
+						}
+						else
+						{
+							// Joystick up or direction up.
+							if (buttonnum == 49153 || buttonnum == 8192)
+							{
+								config_menu.PreviousOption();
+							}
 
-			just_pressed = false;
-		}
-		else
-		{
-			just_pressed = true;
+							// Joystick down or direction down.
+							else if (buttonnum == 32769 || buttonnum == 8194)
+							{
+								config_menu.NextOption();
+							}
+
+							// Button A.
+							else if (buttonnum == 0)
+							{
+								config_menu.ConfirmOption();
+							}
+
+							// Button B.
+							else if (buttonnum == 1)
+							{
+								config_menu.Hide();
+							}
+
+							// Left bumper:
+							if (buttonnum == 4 || buttonnum == 5)
+							{
+								config_menu.Hide();
+							}
+						}
+					}
+					else
+					{
+						// Left bumper:
+						if (buttonnum == 4 || buttonnum == 5)
+						{
+							config_menu.Show();
+						}
+					}
+				}
+
+				just_pressed = false;
+			}
+			else
+			{
+				just_pressed = true;
+			}
 		}
 
 		break;
@@ -1473,17 +1503,7 @@ adelikat: Outsourced this to a remappable hotkey
 		    }
 		    else if (wParam == VK_ESCAPE)
 		    {
-			    if (config_menu.IsShowing())
-			    {
-				    config_menu.Hide();
-			    }
-			    else
-			    {
-				    config_menu.Show();
-
-				    // Start timer to listen for gamepad input.
-				    SetTimer(GetMainHWND(), 1, 25, 0); // Fire timer 1 every 25 ms (generates WM_TIMER message).
-			    }
+				config_menu.Toggle();
 		    }
 		    else if (config_menu.IsShowing())
 		    {
@@ -1741,6 +1761,10 @@ int CreateMainWindow()
 	SetMainWindowStuff();
 
 	CenterWindowOnScreen(hAppWnd);
+
+	// Start timer to listen for gamepad input.
+	// This generates a WM_TIMER message.
+	SetTimer(GetMainHWND(), 1, 25, 0);
 
 	return 1;
 }

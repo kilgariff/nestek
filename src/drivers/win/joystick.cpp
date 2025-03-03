@@ -418,6 +418,30 @@ int InitJoysticks(HWND hwnd)
 
 static bool curr = false;
 
+int CountConnectedJoysticks()
+{
+	int disconnected = 0;
+
+	for (int n = 0; n < numjoysticks; n++)
+	{
+		HRESULT hr = Joysticks[n]->Poll();
+		if (FAILED(hr))
+		{
+			if (hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED)
+			{
+				// Device might be disconnected or lost focus
+				hr = Joysticks[n]->Acquire();
+				if (FAILED(hr))
+				{
+					// Failed to re-acquire, device is likely disconnected
+					++disconnected;
+				}
+			}
+		}
+	}
+
+	return numjoysticks - disconnected;
+}
 
 static void UpdateBackgroundAccess(bool on)
 {

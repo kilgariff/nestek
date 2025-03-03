@@ -66,6 +66,7 @@ public:
 
     void Show();
     void Hide();
+    void Toggle();
 
     void NextOption();
     void PreviousOption();

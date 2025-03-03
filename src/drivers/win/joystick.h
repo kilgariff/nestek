@@ -24,4 +24,6 @@ void JoystickSetBackgroundAccessBit(int bit);
 void JoystickClearBackgroundAccessBit(int bit);
 void JoystickSetBackgroundAccess(bool on);
 
+int CountConnectedJoysticks();
+
 #endif

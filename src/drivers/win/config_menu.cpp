@@ -72,6 +72,18 @@ void ConfigMenu::StopAwaitingKey()
     config_remap_awaiting_key = false;
 }
 
+void ConfigMenu::Toggle()
+{
+    if (showing_config_menu)
+    {
+        Hide();
+    }
+    else
+    {
+        Show();
+    }
+}
+
 void ConfigMenu::Show()
 {
     state = ConfigMenuState::TopLevel;
